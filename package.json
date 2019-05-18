@@ -11,7 +11,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/tsc -p test && node build/test/index.test.js",
+    "build": "./node_modules/.bin/tsc -p src"
   },
   "repository": {
     "type": "git",
