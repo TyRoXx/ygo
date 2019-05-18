@@ -7,12 +7,11 @@ npm install
 Tests
 =====
 ```
-npm run-script test
+./test.sh
 ```
 
 Compile
 =======
 ```
-npm run-script build
-firefox index.html
+./build.sh && firefox index.html
 ```
