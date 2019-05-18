@@ -1,0 +1,26 @@
+{
+  "name": "ygo",
+  "version": "1.0.0",
+  "description": "Card game",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "typescript": "^3.4.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TyRoXx/ygo.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TyRoXx/ygo/issues"
+  },
+  "homepage": "https://github.com/TyRoXx/ygo#readme"
+}
