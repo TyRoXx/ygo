@@ -5,7 +5,7 @@ enum UpDownOrientation {
 
 const cardHeight = 153
 
-let createCell = function (imageUrl: string, playerOrientation: UpDownOrientation, defenseMode: boolean) {
+let createCell = function (imageUrl: string, playerOrientation: UpDownOrientation, defenseMode: boolean): HTMLElement {
     let cell = document.createElement("td")
     let image = document.createElement("img")
     image.setAttribute("src", imageUrl)
@@ -23,6 +23,34 @@ let createCell = function (imageUrl: string, playerOrientation: UpDownOrientatio
     image.style.transform = `rotate(${rotation}deg)`
     cell.appendChild(image)
     return cell
+}
+
+let createMonsterCard = function (id: string, playerOrientation: UpDownOrientation): HTMLElement {
+    let monster = new Monster(id);
+    let card = createCell(monster.getImageUrl(), playerOrientation, monster.isInDefensePosition());
+    card.style.position = 'relative'
+
+    let attack = document.createElement('p')
+    attack.innerHTML = String(monster.getAttack())
+    attack.style.color = 'red'
+
+    let defense = document.createElement('p')
+    defense.innerHTML = String(monster.getDefense())
+    defense.style.color = 'blue'
+
+    let overlay = document.createElement('div')
+    overlay.appendChild(attack);
+    overlay.appendChild(defense);
+    overlay.style.position = 'absolute';
+    overlay.style.top = '0px'
+    overlay.style.width = '100%';
+    overlay.style.zIndex = '10';
+    overlay.style.textAlign = 'center';
+    overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+
+    card.appendChild(overlay)
+
+    return card;
 }
 
 let setUpPlayer = function (board: HTMLTableElement, orientation: UpDownOrientation): void {
@@ -53,7 +81,7 @@ let setUpPlayer = function (board: HTMLTableElement, orientation: UpDownOrientat
     lowerRow.push(extraDeck)
 
     for (let i = 0; i < 5; ++i) {
-        let monsterZone = createCell("https://ygoprodeck.com/pics/85936485.jpg", orientation, (i % 2) == 0)
+        let monsterZone = createMonsterCard('20', orientation)
         upperRow.push(monsterZone)
         monsterZone.style.width = cardHeight.toString() + "px"
 
