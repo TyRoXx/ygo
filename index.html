@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,15 +8,17 @@
     <script>
         let exports = {};
     </script>
-    <script src="build/src/index.js"></script>
+    <script src="build/front-end.js"></script>
     <script>
-        function setUpBoard() {
-            document.body.appendChild(exports.setUpBoard())
+        function start() {
+            document.body.appendChild(setUpBoard())
         }
     </script>
     <title>Document</title>
 </head>
-<body onload="setUpBoard()">
-    
+
+<body onload="start()">
+
 </body>
+
 </html>

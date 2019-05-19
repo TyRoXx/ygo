@@ -1,11 +1,10 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true,
-        "outDir": "../build/src",
+        "outFile": "../build/front-end.js",
         "strictNullChecks": true
     },
     "includes": [

@@ -2,7 +2,7 @@ function isPasscode(value: string): boolean {
     return (value.length == 8)
 }
 
-export class Passcode {
+class Passcode {
     constructor(private value: string) {
         if (!isPasscode(value)) {
             throw new Error("Passcode expected: " + value)
@@ -14,83 +14,49 @@ export class Passcode {
     }
 }
 
-export class Card {
+class Card {
     constructor(public id: Passcode, public originalAttack: Number, public originalDefense: Number) {
     }
 }
 
-export class CardInstance {
+class CardInstance {
     constructor(public card: Card) {
     }
 }
 
-export class FaceUpDownCardInstance extends CardInstance {
+class FaceUpDownCardInstance extends CardInstance {
     constructor(card: Card, public isFaceUp: boolean) {
         super(card)
     }
 }
 
-export class MonsterZone {
+class MonsterZone {
     constructor(public monster: FaceUpDownCardInstance | undefined, public inDefenseMode: boolean) {
     }
 }
 
-export class SpellTrapZone {
+class SpellTrapZone {
     constructor(public spellTrap: FaceUpDownCardInstance | undefined) {
     }
 }
 
-export class FieldSpellZone {
+class FieldSpellZone {
     constructor(public fieldSpell: FaceUpDownCardInstance | undefined) {
     }
 }
 
-export class Graveyard {
+class Graveyard {
     constructor(public contents: Array<CardInstance>) {
     }
 }
 
-export class ExtraDeck {
+class ExtraDeck {
     constructor(public contents: Array<CardInstance>) {
     }
 }
 
-export class Banished {
+class Banished {
     constructor(public contents: Array<FaceUpDownCardInstance>) {
-    }
-}
-
-export class FieldHalf {
-    constructor(public monsters: Array<MonsterZone>,
-        public spellTraps: Array<SpellTrapZone>,
-        public fieldSpell: FieldSpellZone,
-        public graveyard: Graveyard,
-        public extraDeck: ExtraDeck,
-        public banished: Banished) {
-        if (monsters.length !== 5) {
-            throw new Error("There have to be 5 main monster zones")
-        }
-        if (!monsters.every((element: MonsterZone | undefined) => {
-            return element != undefined
-        })) {
-            throw new Error("The main monster zones must not be undefined")
-        }
-        if (spellTraps.length !== 5) {
-            throw new Error("There have to be 5 spell/trap zones")
-        }
-        if (!spellTraps.every((element: SpellTrapZone | undefined) => {
-            return element != undefined
-        })) {
-            throw new Error("The spell/trap zones must not be undefined")
-        }
-    }
-}
-
-export class Field {
-    constructor(public firstPlayer: FieldHalf,
-        public secondPlayer: FieldHalf,
-        public firstExtraZone: FaceUpDownCardInstance | undefined,
-        public secondExtraZone: FaceUpDownCardInstance | undefined) {
     }
 }
 
@@ -165,8 +131,11 @@ let findCardPicture = function (passcode: Passcode): string {
     return `https://ygoprodeck.com/pics/${passcode.toString()}.jpg`
 }
 
-let setUpPlayer = function (board: HTMLTableElement, orientation: UpDownOrientation,
-    state: FieldHalf): void {
+let setUpPlayer = function (
+    board: HTMLTableElement,
+    orientation: UpDownOrientation,
+    state: FieldHalf
+): void {
     let appendChildren = function (to: HTMLElement, children: Array<HTMLElement>) {
         switch (orientation) {
             case UpDownOrientation.Down:
@@ -254,7 +223,7 @@ let createEmptySpellTrapZones = function () {
     return zones
 }
 
-export function setUpBoard(): HTMLElement {
+function setUpBoard(): HTMLElement {
     let field = new Field(
         new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
             new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
