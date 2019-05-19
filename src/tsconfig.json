@@ -1,11 +1,14 @@
 {
     "compilerOptions": {
-        "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true,
         "outFile": "../build/front-end.js",
-        "strictNullChecks": true
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "alwaysStrict": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true
     },
     "includes": [
         "**"
