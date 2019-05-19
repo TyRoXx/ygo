@@ -321,13 +321,30 @@ function setUpBoard(): HTMLElement {
         'If you control "Dark Magician": Destroy all Spell and Trap Cards your opponent controls.'
     )
 
+    let extraMonster = new Card(
+        new Passcode('23995346'),
+        'Ultimate Blue Eyed Dragon',
+        4500,
+        3800,
+        'Dragon/Fusion',
+        '"Blue-Eyes White Dragon" * 3'
+    )
+
     state.players[0].field.monsters[2].monster = new FaceUpDownCardInstance(demoMonster, true)
     state.players[0].field.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, false)
     state.players[0].field.monsters[1].inDefenseMode = true
     state.players[0].field.spellTraps[0].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
+    state.players[0].extraZone = new FaceUpDownCardInstance(
+        extraMonster,
+        true
+    )
 
     state.players[1].field.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, true)
     state.players[1].field.spellTraps[3].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
+    state.players[1].extraZone = new FaceUpDownCardInstance(
+        extraMonster,
+        true
+    )
 
     let board = document.createElement("table")
     setUpPlayer(board, UpDownOrientation.Down, state.players[0].field)
@@ -337,19 +354,9 @@ function setUpBoard(): HTMLElement {
             switch (i) {
                 case 3:
                 case 5:
-                    let extraMonster = new Card(
-                        new Passcode('23995346'),
-                        'Ultimate Blue Eyed Dragon',
-                        4500,
-                        3800,
-                        'Dragon/Fusion',
-                        '"Blue-Eyes White Dragon" * 3'
-                    )
+                    let extraMonsterInstance = state.players[(i == 3) ? 0 : 1].extraZone
                     let extraMonsterZone = createCard(
-                        new FaceUpDownCardInstance(
-                            extraMonster,
-                            true
-                        ),
+                        extraMonsterInstance,
                         (i == 3) ? UpDownOrientation.Down : UpDownOrientation.Up,
                         false,
                         true
