@@ -252,7 +252,9 @@ let setUpPlayer = function (
         spellTrapZoneElement.style.width = cardHeight.toString() + "px"
     }
 
-    let graveyard = createCell("https://ygoprodeck.com/pics/85936485.jpg", orientation, false)
+    let graveyard = createCell((state.graveyard.contents.length > 0) ? findCardPicture(state.graveyard.contents[
+        state.graveyard.contents.length - 1
+    ].card.id) : undefined, orientation, false)
     upperRow.push(graveyard)
 
     let deck = createCell(back, orientation, false)
@@ -293,10 +295,19 @@ let createEmptySpellTrapZones = function () {
 }
 
 function setUpBoard(): HTMLElement {
+    let demoMonster = new Card(
+        new Passcode('85936485'),
+        'United Resistance',
+        1000,
+        400,
+        'Thunder',
+        'The people that gather to swear to fight their oppressors. A revolution is coming'
+    );
+
     let state = new GameState(
         [
             new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
-                new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
+                new FieldSpellZone(undefined), new Graveyard([new CardInstance(demoMonster)]),
                 new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
                 8000,
                 new Hand([])),
@@ -310,15 +321,6 @@ function setUpBoard(): HTMLElement {
         Phase.Main1,
         [new ExtraMonsterZone(-1, undefined), new ExtraMonsterZone(-1, undefined)]
     )
-
-    let demoMonster = new Card(
-        new Passcode('85936485'),
-        'United Resistance',
-        1000,
-        400,
-        'Thunder',
-        'The people that gather to swear to fight their oppressors. A revolution is coming'
-    );
 
     let demoSpell = new Card(
         new Passcode('02314238'),
