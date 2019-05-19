@@ -69,7 +69,7 @@ class Player {
         public field: FieldHalf,
         public life: Number,
         public hand: Hand,
-        public deck : Deck) {
+        public deck: Deck) {
     }
 }
 
@@ -125,6 +125,10 @@ let createCell = function (
     let cell = document.createElement("td")
     cell.style.textAlign = "center"
     cell.style.border = "1px solid black"
+
+    // make that empty cells do not collapse
+    cell.style.width = (cardHeight * 0.7).toString() + "px"
+
     if (imageUrl) {
         let image = document.createElement("img")
         image.setAttribute("src", imageUrl)
@@ -200,7 +204,8 @@ let createCard = function (
 }
 
 let findCardPicture = function (passcode: Passcode): string {
-    return `https://ygoprodeck.com/pics/${passcode.toString()}.jpg`
+    let withoutLeadingZero = parseInt(passcode.toString(), 10).toString()
+    return `https://ygoprodeck.com/pics/${withoutLeadingZero}.jpg`
 }
 
 let setUpPlayer = function (
@@ -267,7 +272,9 @@ let setUpPlayer = function (
     let deck = createCell((playerState.deck.contents.length > 0) ? back : undefined, orientation, false)
     lowerRow.push(deck)
 
-    let banished = createCell("https://ygoprodeck.com/pics/85936485.jpg", orientation, false)
+    let banished = createCell((field.banished.contents.length > 0) ? findCardPicture(field.banished.contents[
+        field.banished.contents.length - 1
+    ].card.id) : undefined, orientation, false)
     upperRow.push(banished)
     lowerRow.push(document.createElement("td"))
 
@@ -323,7 +330,7 @@ function setUpBoard(): HTMLElement {
         [
             new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
                 new FieldSpellZone(undefined), new Graveyard([new CardInstance(demoMonster)]),
-                new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
+                new ExtraDeck(new Array<CardInstance>()), new Banished([new FaceUpDownCardInstance(demoSpell, true)])),
                 8000,
                 new Hand([]),
                 new Deck([])),
