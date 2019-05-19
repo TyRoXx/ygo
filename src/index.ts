@@ -285,15 +285,23 @@ let createEmptySpellTrapZones = function () {
 }
 
 function setUpBoard(): HTMLElement {
-    let field = new Field(
-        new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
-            new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
-            new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
-        new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
-            new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
-            new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
-        undefined,
-        undefined
+    let state = new GameState(
+        [
+            new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
+                new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
+                new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
+                undefined,
+                8000,
+                new Hand([])),
+            new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
+                new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
+                new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
+                undefined,
+                8000,
+                new Hand([]))
+        ],
+        0,
+        Phase.Main1
     )
 
     let demoMonster = new Card(
@@ -313,16 +321,16 @@ function setUpBoard(): HTMLElement {
         'If you control "Dark Magician": Destroy all Spell and Trap Cards your opponent controls.'
     )
 
-    field.firstPlayer.monsters[2].monster = new FaceUpDownCardInstance(demoMonster, true)
-    field.firstPlayer.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, false)
-    field.firstPlayer.monsters[1].inDefenseMode = true
-    field.firstPlayer.spellTraps[0].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
+    state.players[0].field.monsters[2].monster = new FaceUpDownCardInstance(demoMonster, true)
+    state.players[0].field.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, false)
+    state.players[0].field.monsters[1].inDefenseMode = true
+    state.players[0].field.spellTraps[0].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
 
-    field.secondPlayer.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, true)
-    field.secondPlayer.spellTraps[4].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
+    state.players[1].field.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, true)
+    state.players[1].field.spellTraps[3].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
 
     let board = document.createElement("table")
-    setUpPlayer(board, UpDownOrientation.Down, field.firstPlayer)
+    setUpPlayer(board, UpDownOrientation.Down, state.players[0].field)
     {
         let tr = document.createElement("tr")
         for (let i = 0; i < 7; ++i) {
@@ -356,7 +364,7 @@ function setUpBoard(): HTMLElement {
         }
         board.appendChild(tr)
     }
-    setUpPlayer(board, UpDownOrientation.Up, field.secondPlayer)
+    setUpPlayer(board, UpDownOrientation.Up, state.players[1].field)
 
     board.appendChild(popupElement)
     return board
