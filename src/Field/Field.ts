@@ -23,11 +23,3 @@ class FieldHalf {
 		}
 	}
 }
-
-class Field {
-	constructor(public firstPlayer: FieldHalf,
-		public secondPlayer: FieldHalf,
-		public firstExtraZone: FaceUpDownCardInstance | undefined,
-		public secondExtraZone: FaceUpDownCardInstance | undefined) {
-	}
-}
