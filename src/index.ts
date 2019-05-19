@@ -1,5 +1,4 @@
-let popupElement = document.createElement('div');
-
+let rightPane: HTMLElement;
 function isPasscode(value: string): boolean {
     return (value.length == 8)
 }
@@ -129,16 +128,11 @@ let createCard = function (
     }
 
     cell.addEventListener('mousemove', (e): void => {
-        popupElement.innerHTML = `<h2>${card.name}</h2><b>${card.type}</b><br />${card.description}`;
-        popupElement.style.position = "fixed"
-        popupElement.style.display = 'block'
-        popupElement.style.zIndex = '20'
-        popupElement.style.backgroundColor = 'gold'
-        popupElement.style.padding = '0.5em'
-        popupElement.style.left = (e.clientX + 20) + "px"
-        popupElement.style.top = (e.clientY + 20) + "px"
+        rightPane.style.display = 'block';
+        let rightPaneElement = rightPane.children[0]
+        rightPaneElement.innerHTML = `<h2>${card.name}</h2><b>${card.type}</b><br />${card.description}`;
     });
-    cell.addEventListener('mouseout', () => popupElement.style.display = 'none')
+    cell.addEventListener('mouseout', () => rightPane.style.display = 'none')
 
     return cell;
 }
@@ -279,6 +273,14 @@ function setUpBoard(): HTMLElement {
     field.secondPlayer.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, true)
     field.secondPlayer.spellTraps[4].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
 
+    let body = document.createElement('div')
+    body.style.display = 'flex';
+    body.style.alignItems = 'stretch';
+    let left = document.createElement('div')
+    left.style.background = 'silver';
+    left.style.cssFloat = 'left';
+    left.style.minWidth = '1300px'
+
     let board = document.createElement("table")
     setUpPlayer(board, UpDownOrientation.Down, field.firstPlayer)
     {
@@ -315,7 +317,15 @@ function setUpBoard(): HTMLElement {
         board.appendChild(tr)
     }
     setUpPlayer(board, UpDownOrientation.Up, field.secondPlayer)
+    rightPane = document.createElement('div')
+    rightPane.appendChild(createParagraph('Card info'))
+    rightPane.style.backgroundColor = 'gold'
+    rightPane.style.width = '100%'
+    rightPane.style.padding = '5px 10px'
 
-    board.appendChild(popupElement)
-    return board
+    left.appendChild(board)
+
+    body.appendChild(left)
+    body.appendChild(rightPane)
+    return body
 }
