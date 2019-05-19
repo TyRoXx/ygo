@@ -6,7 +6,7 @@
         "preserveConstEnums": true,
         "sourceMap": true,
         "target": "es6",
-        "outDir": "../build"
+        "outDir": "../build/test"
     },
     "includes": [
         "**"

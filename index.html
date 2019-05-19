@@ -9,13 +9,13 @@
     </script>
     <script src="build/src/index.js"></script>
     <script>
-        
-        let a = new exports.Printer(30);
-        a.print();
+        function setUpBoard() {
+            document.body.appendChild(exports.setUpBoard())
+        }
     </script>
     <title>Document</title>
 </head>
-<body>
+<body onload="setUpBoard()">
     
 </body>
 </html>

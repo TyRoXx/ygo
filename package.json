@@ -2,7 +2,6 @@
   "name": "ygo",
   "version": "1.0.0",
   "description": "Card game",
-  "main": "index.js",
   "directories": {
     "test": "test"
   },
