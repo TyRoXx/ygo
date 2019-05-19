@@ -129,13 +129,13 @@ let createCard = function(
 
     if (isMonsterZone) {
         let attack = document.createElement('p')
-        attack.innerHTML = String(card.originalAttack)
+        attack.innerText = String(card.originalAttack)
         attack.style.color = 'red'
         attack.style.padding = "0"
         attack.style.margin = "0"
 
         let defense = document.createElement('p')
-        defense.innerHTML = String(card.originalDefense)
+        defense.innerText = String(card.originalDefense)
         defense.style.color = 'blue'
         defense.style.padding = "0"
         defense.style.margin = "0"
