@@ -20,3 +20,10 @@ For automatic rebuilds:
 ```
 npm run-script watch
 ```
+
+Format
+======
+
+```
+./format.sh
+```
