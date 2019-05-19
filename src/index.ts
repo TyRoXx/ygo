@@ -239,7 +239,7 @@ let setUpPlayer = function (
         orientation, false)
     upperRow.push(fieldSpell)
 
-    let extraDeck = createCell(back, orientation, false)
+    let extraDeck = createCell((playerState.field.extraDeck.contents.length > 0) ? back : undefined, orientation, false)
     lowerRow.push(extraDeck)
 
     for (let i = 0; i < 5; ++i) {
@@ -336,6 +336,15 @@ function setUpBoard(): HTMLElement {
         'Your opponent cannot target “Danger!” monsters you control with card effects during the turn they are Special Summoned. Once per turn: you can target 1 “Danger!” monster you control; while you control that faceup monster and this faceup card, that monster can attack your opponent directly, also your opponent’s monsters cannot target it for attacks, but it does not prevent your opponent from attacking you directly.'
     )
 
+    let extraMonster = new Card(
+        new Passcode('23995346'),
+        'Ultimate Blue Eyed Dragon',
+        4500,
+        3800,
+        'Dragon/Fusion',
+        '"Blue-Eyes White Dragon" * 3'
+    )
+
     let state = new GameState(
         [
             new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
@@ -346,7 +355,7 @@ function setUpBoard(): HTMLElement {
                 new Deck([])),
             new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
                 new FieldSpellZone(new FaceUpDownCardInstance(demoFieldSpell, true)), new Graveyard(new Array<CardInstance>()),
-                new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
+                new ExtraDeck([new CardInstance(extraMonster)]), new Banished(new Array<FaceUpDownCardInstance>())),
                 8000,
                 new Hand([]),
                 new Deck([demoSpell]))
@@ -354,15 +363,6 @@ function setUpBoard(): HTMLElement {
         0,
         Phase.Main1,
         [new ExtraMonsterZone(-1, undefined), new ExtraMonsterZone(-1, undefined)]
-    )
-
-    let extraMonster = new Card(
-        new Passcode('23995346'),
-        'Ultimate Blue Eyed Dragon',
-        4500,
-        3800,
-        'Dragon/Fusion',
-        '"Blue-Eyes White Dragon" * 3'
     )
 
     state.players[0].field.monsters[2].monster = new FaceUpDownCardInstance(demoMonster, true)
