@@ -54,6 +54,48 @@ class Banished {
     }
 }
 
+class Hand {
+    constructor(public contents: Array<Card>) {
+    }
+}
+
+class Player {
+    constructor(
+        public field: FieldHalf,
+        public extraZone: FaceUpDownCardInstance | undefined,
+        public life: Number,
+        public hand: Hand) {
+    }
+}
+
+enum Phase {
+    Draw,
+    Standby,
+    Main1,
+    // Battle Phase begin
+    StartStep,
+    BattleStep,
+    DamageStep,
+    EndStep,
+    // Battle Phase end
+    Main2,
+    End
+}
+
+class GameState {
+    constructor(
+        public players: Array<Player>,
+        public turnPlayer: Number,
+        public phase: Phase) {
+        if (players.length != 2) {
+            throw new Error("Unsupported number of players")
+        }
+        if (turnPlayer < 0 || turnPlayer >= players.length) {
+            throw new Error("Invalid turn player index")
+        }
+    }
+}
+
 const enum UpDownOrientation {
     Up,
     Down
