@@ -1,6 +1,6 @@
 function createParagraph(text: string): HTMLElement {
-	let p = document.createElement('p');
-	p.innerHTML = text;
+    let p = document.createElement('p');
+    p.innerHTML = text;
 
-	return p
+    return p
 }
