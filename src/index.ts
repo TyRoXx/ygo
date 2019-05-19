@@ -119,7 +119,7 @@ let createCard = function(
     }
 
     let card = cardInstance.card;
-    let cell;
+    let cell: HTMLElement;
     if (cardInstance.isFaceUp) {
         cell = createCell(findCardPicture(card.id), playerOrientation, defenseMode)
     } else {
@@ -129,12 +129,16 @@ let createCard = function(
 
     if (isMonsterZone) {
         let attack = document.createElement('p')
-        attack.innerHTML = String(card.originalAttack)
+        attack.innerText = String(card.originalAttack)
         attack.style.color = 'red'
+        attack.style.padding = "0"
+        attack.style.margin = "0"
 
         let defense = document.createElement('p')
-        defense.innerHTML = String(card.originalDefense)
+        defense.innerText = String(card.originalDefense)
         defense.style.color = 'blue'
+        defense.style.padding = "0"
+        defense.style.margin = "0"
 
         let overlay = document.createElement('div')
         overlay.appendChild(attack);
@@ -151,7 +155,19 @@ let createCard = function(
     cell.addEventListener('mousemove', (e): void => {
         rightPane.style.display = 'block';
         let rightPaneElement = rightPane.children[0]
-        rightPaneElement.innerHTML = `<h2>${card.name}</h2><b>${card.type}</b><br />${card.description}`;
+        let name = document.createElement("h2")
+        name.innerText = card.name
+        let type = document.createElement("b")
+        type.innerText = card.type
+        while (rightPaneElement.firstChild) {
+            rightPaneElement.removeChild(rightPaneElement.firstChild);
+        }
+        rightPaneElement.append(
+            name,
+            type,
+            document.createElement("br"),
+            document.createTextNode(card.description)
+        )
     });
     cell.addEventListener('mouseout', () => rightPane.style.display = 'none')
 
