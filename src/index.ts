@@ -152,7 +152,7 @@ let createCard = function(
         cell.appendChild(overlay)
     }
 
-    cell.addEventListener('mousemove', (e): void => {
+    cell.addEventListener('click', (e): void => {
         rightPane.style.display = 'block';
         let rightPaneElement = rightPane.children[0]
         let name = document.createElement("h2")
@@ -169,7 +169,6 @@ let createCard = function(
             document.createTextNode(card.description)
         )
     });
-    cell.addEventListener('mouseout', () => rightPane.style.display = 'none')
 
     return cell;
 }
