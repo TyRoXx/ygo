@@ -58,12 +58,17 @@ class Hand {
     }
 }
 
+class Deck {
+    constructor(public contents: Array<Card>) {
+    }
+}
+
 class Player {
     constructor(
         public field: FieldHalf,
-        public extraZone: FaceUpDownCardInstance | undefined,
         public life: Number,
-        public hand: Hand) {
+        public hand: Hand,
+        public deck: Deck) {
     }
 }
 
@@ -81,16 +86,25 @@ enum Phase {
     End
 }
 
+class ExtraMonsterZone {
+    constructor(public owner: Number, public monster: FaceUpDownCardInstance | undefined) {
+    }
+}
+
 class GameState {
     constructor(
         public players: Array<Player>,
         public turnPlayer: Number,
-        public phase: Phase) {
+        public phase: Phase,
+        public extraMonsterZones: Array<ExtraMonsterZone>) {
         if (players.length != 2) {
             throw new Error("Unsupported number of players")
         }
         if (turnPlayer < 0 || turnPlayer >= players.length) {
             throw new Error("Invalid turn player index")
+        }
+        if (extraMonsterZones.length != 2) {
+            throw new Error("Unsupported number of extra monster zones")
         }
     }
 }
@@ -110,6 +124,10 @@ let createCell = function (
     let cell = document.createElement("td")
     cell.style.textAlign = "center"
     cell.style.border = "1px solid black"
+
+    // make that empty cells do not collapse
+    cell.style.width = (cardHeight * 0.7).toString() + "px"
+
     if (imageUrl) {
         let image = document.createElement("img")
         image.setAttribute("src", imageUrl)
@@ -180,14 +198,16 @@ let createCard = function (
 }
 
 let findCardPicture = function (passcode: Passcode): string {
-    return `https://ygoprodeck.com/pics/${passcode.toString()}.jpg`
+    let withoutLeadingZero = parseInt(passcode.toString(), 10).toString()
+    return `https://ygoprodeck.com/pics/${withoutLeadingZero}.jpg`
 }
 
 let setUpPlayer = function (
     board: HTMLTableElement,
     orientation: UpDownOrientation,
-    state: FieldHalf
+    playerState: Player
 ): void {
+    let field = playerState.field
     let appendChildren = function (to: HTMLElement, children: Array<HTMLElement>) {
         switch (orientation) {
             case UpDownOrientation.Down:
@@ -208,15 +228,17 @@ let setUpPlayer = function (
 
     let back = "https://vignette.wikia.nocookie.net/yugioh/images/e/e5/Back-EN.png/revision/latest?cb=20100726082133"
 
-    let fieldSpell = createCell(back, orientation, false)
+    let fieldSpell = createCell(
+        field.fieldSpell.fieldSpell ? (field.fieldSpell.fieldSpell.isFaceUp ? findCardPicture(field.fieldSpell.fieldSpell.card.id) : back) : undefined,
+        orientation, false)
     upperRow.push(fieldSpell)
 
-    let extraDeck = createCell(back, orientation, false)
+    let extraDeck = createCell((playerState.field.extraDeck.contents.length > 0) ? back : undefined, orientation, false)
     lowerRow.push(extraDeck)
 
     for (let i = 0; i < 5; ++i) {
         {
-            let monsterZone = state.monsters[i]
+            let monsterZone = field.monsters[i]
             let monsterZoneElement = createCard(
                 monsterZone.monster,
                 orientation,
@@ -227,7 +249,7 @@ let setUpPlayer = function (
             monsterZoneElement.style.width = cardHeight.toString() + "px"
         }
 
-        let spellTrap = state.spellTraps[i].spellTrap;
+        let spellTrap = field.spellTraps[i].spellTrap;
         let spellTrapZoneElement;
         if (spellTrap === undefined) {
             spellTrapZoneElement = createCell(undefined, orientation, false)
@@ -238,13 +260,17 @@ let setUpPlayer = function (
         spellTrapZoneElement.style.width = cardHeight.toString() + "px"
     }
 
-    let graveyard = createCell("https://ygoprodeck.com/pics/85936485.jpg", orientation, false)
+    let graveyard = createCell((field.graveyard.contents.length > 0) ? findCardPicture(field.graveyard.contents[
+        field.graveyard.contents.length - 1
+    ].card.id) : undefined, orientation, false)
     upperRow.push(graveyard)
 
-    let deck = createCell(back, orientation, false)
+    let deck = createCell((playerState.deck.contents.length > 0) ? back : undefined, orientation, false)
     lowerRow.push(deck)
 
-    let banished = createCell("https://ygoprodeck.com/pics/85936485.jpg", orientation, false)
+    let banished = createCell((field.banished.contents.length > 0) ? findCardPicture(field.banished.contents[
+        field.banished.contents.length - 1
+    ].card.id) : undefined, orientation, false)
     upperRow.push(banished)
     lowerRow.push(document.createElement("td"))
 
@@ -279,25 +305,6 @@ let createEmptySpellTrapZones = function () {
 }
 
 function setUpBoard(): HTMLElement {
-    let state = new GameState(
-        [
-            new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
-                new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
-                new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
-                undefined,
-                8000,
-                new Hand([])),
-            new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
-                new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
-                new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
-                undefined,
-                8000,
-                new Hand([]))
-        ],
-        0,
-        Phase.Main1
-    )
-
     let demoMonster = new Card(
         new Passcode('85936485'),
         'United Resistance',
@@ -315,13 +322,58 @@ function setUpBoard(): HTMLElement {
         'If you control "Dark Magician": Destroy all Spell and Trap Cards your opponent controls.'
     )
 
+    let demoFieldSpell = new Card(
+        new Passcode('79698395'),
+        'Realm of Danger!',
+        0, 0,
+        'Normal',
+        'Your opponent cannot target “Danger!” monsters you control with card effects during the turn they are Special Summoned. Once per turn: you can target 1 “Danger!” monster you control; while you control that faceup monster and this faceup card, that monster can attack your opponent directly, also your opponent’s monsters cannot target it for attacks, but it does not prevent your opponent from attacking you directly.'
+    )
+
+    let extraMonster = new Card(
+        new Passcode('23995346'),
+        'Ultimate Blue Eyed Dragon',
+        4500,
+        3800,
+        'Dragon/Fusion',
+        '"Blue-Eyes White Dragon" * 3'
+    )
+
+    let state = new GameState(
+        [
+            new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
+                new FieldSpellZone(undefined), new Graveyard([new CardInstance(demoMonster)]),
+                new ExtraDeck(new Array<CardInstance>()), new Banished([new FaceUpDownCardInstance(demoSpell, true)])),
+                8000,
+                new Hand([]),
+                new Deck([])),
+            new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
+                new FieldSpellZone(new FaceUpDownCardInstance(demoFieldSpell, true)), new Graveyard(new Array<CardInstance>()),
+                new ExtraDeck([new CardInstance(extraMonster)]), new Banished(new Array<FaceUpDownCardInstance>())),
+                8000,
+                new Hand([]),
+                new Deck([demoSpell]))
+        ],
+        0,
+        Phase.Main1,
+        [new ExtraMonsterZone(-1, undefined), new ExtraMonsterZone(-1, undefined)]
+    )
+
     state.players[0].field.monsters[2].monster = new FaceUpDownCardInstance(demoMonster, true)
     state.players[0].field.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, false)
     state.players[0].field.monsters[1].inDefenseMode = true
     state.players[0].field.spellTraps[0].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
+    state.extraMonsterZones[1] = new ExtraMonsterZone(0, new FaceUpDownCardInstance(
+        extraMonster,
+        true
+    ))
 
     state.players[1].field.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, true)
     state.players[1].field.spellTraps[3].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
+    state.extraMonsterZones[0] = new ExtraMonsterZone(1, new FaceUpDownCardInstance(
+        extraMonster,
+        true
+    ))
 
     let body = document.createElement('div')
     body.style.display = 'flex';
@@ -332,32 +384,22 @@ function setUpBoard(): HTMLElement {
     left.style.minWidth = '1300px'
 
     let board = document.createElement("table")
-    setUpPlayer(board, UpDownOrientation.Down, state.players[0].field)
+    setUpPlayer(board, UpDownOrientation.Down, state.players[0])
     {
         let tr = document.createElement("tr")
-        for (let i = 0; i < 7; ++i) {
+        for (let i = 0; i < 9; ++i) {
             switch (i) {
                 case 3:
                 case 5:
-                    let extraMonster = new Card(
-                        new Passcode('23995346'),
-                        'Ultimate Blue Eyed Dragon',
-                        4500,
-                        3800,
-                        'Dragon/Fusion',
-                        '"Blue-Eyes White Dragon" * 3'
-                    )
-                    let extraMonsterZone = createCard(
-                        new FaceUpDownCardInstance(
-                            extraMonster,
-                            true
-                        ),
-                        (i == 3) ? UpDownOrientation.Down : UpDownOrientation.Up,
+                    let extraMonsterZone = state.extraMonsterZones[(i === 3) ? 0 : 1]
+                    let extraMonsterZoneElement = createCard(
+                        extraMonsterZone.monster,
+                        (extraMonsterZone.owner === 0) ? UpDownOrientation.Down : UpDownOrientation.Up,
                         false,
                         true
                     )
-                    tr.appendChild(extraMonsterZone)
-                    extraMonsterZone.style.width = cardHeight.toString() + "px"
+                    tr.appendChild(extraMonsterZoneElement)
+                    extraMonsterZoneElement.style.width = cardHeight.toString() + "px"
                     break
 
                 default:
@@ -366,7 +408,7 @@ function setUpBoard(): HTMLElement {
         }
         board.appendChild(tr)
     }
-    setUpPlayer(board, UpDownOrientation.Up, state.players[1].field)
+    setUpPlayer(board, UpDownOrientation.Up, state.players[1])
     rightPane = document.createElement('div')
     rightPane.appendChild(createParagraph('Card info'))
     rightPane.style.backgroundColor = 'gold'
