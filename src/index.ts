@@ -272,6 +272,8 @@ function setUpBoard(): HTMLElement {
     )
 
     field.firstPlayer.monsters[2].monster = new FaceUpDownCardInstance(demoMonster, true)
+    field.firstPlayer.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, false)
+    field.firstPlayer.monsters[1].inDefenseMode = true
     field.firstPlayer.spellTraps[0].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
 
     field.secondPlayer.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, true)
