@@ -1,41 +1,149 @@
-enum UpDownOrientation {
+function isPasscode(value: string): boolean {
+    return (value.length == 8)
+}
+
+export class Passcode {
+    constructor(private value: string) {
+        if (!isPasscode(value)) {
+            throw new Error("Passcode expected: " + value)
+        }
+    }
+
+    toString(): string {
+        return this.value
+    }
+}
+
+export class Card {
+    constructor(public id: Passcode, public originalAttack: Number, public originalDefense: Number) {
+    }
+}
+
+export class CardInstance {
+    constructor(public card: Card) {
+    }
+}
+
+export class FaceUpDownCardInstance extends CardInstance {
+    constructor(card: Card, public isFaceUp: boolean) {
+        super(card)
+    }
+}
+
+export class MonsterZone {
+    constructor(public monster: FaceUpDownCardInstance | undefined, public inDefenseMode: boolean) {
+    }
+}
+
+export class SpellTrapZone {
+    constructor(public spellTrap: FaceUpDownCardInstance | undefined) {
+    }
+}
+
+export class FieldSpellZone {
+    constructor(public fieldSpell: FaceUpDownCardInstance | undefined) {
+    }
+}
+
+export class Graveyard {
+    constructor(public contents: Array<CardInstance>) {
+    }
+}
+
+export class ExtraDeck {
+    constructor(public contents: Array<CardInstance>) {
+    }
+}
+
+export class Banished {
+    constructor(public contents: Array<FaceUpDownCardInstance>) {
+    }
+}
+
+export class FieldHalf {
+    constructor(public monsters: Array<MonsterZone>,
+        public spellTraps: Array<SpellTrapZone>,
+        public fieldSpell: FieldSpellZone,
+        public graveyard: Graveyard,
+        public extraDeck: ExtraDeck,
+        public banished: Banished) {
+        if (monsters.length !== 5) {
+            throw new Error("There have to be 5 main monster zones")
+        }
+        if (!monsters.every((element: MonsterZone | undefined) => {
+            return element != undefined
+        })) {
+            throw new Error("The main monster zones must not be undefined")
+        }
+        if (spellTraps.length !== 5) {
+            throw new Error("There have to be 5 spell/trap zones")
+        }
+        if (!spellTraps.every((element: SpellTrapZone | undefined) => {
+            return element != undefined
+        })) {
+            throw new Error("The spell/trap zones must not be undefined")
+        }
+    }
+}
+
+export class Field {
+    constructor(public firstPlayer: FieldHalf,
+        public secondPlayer: FieldHalf,
+        public firstExtraZone: FaceUpDownCardInstance | undefined,
+        public secondExtraZone: FaceUpDownCardInstance | undefined) {
+    }
+}
+
+const enum UpDownOrientation {
     Up,
     Down
 }
 
 const cardHeight = 153
 
-let createCell = function (imageUrl: string, playerOrientation: UpDownOrientation, defenseMode: boolean): HTMLElement {
+let createCell = function (
+    imageUrl: string | undefined,
+    playerOrientation: UpDownOrientation,
+    defenseMode: boolean
+) {
     let cell = document.createElement("td")
-    let image = document.createElement("img")
-    image.setAttribute("src", imageUrl)
-    image.setAttribute("height", cardHeight.toString())
     cell.style.textAlign = "center"
     cell.style.border = "1px solid black"
-    let rotation = (defenseMode ? 270 : 0)
-    switch (playerOrientation) {
-        case UpDownOrientation.Down:
-            rotation += 180
-            break
-        case UpDownOrientation.Up:
-            break
+    if (imageUrl) {
+        let image = document.createElement("img")
+        image.setAttribute("src", imageUrl)
+        image.setAttribute("height", cardHeight.toString())
+        let rotation = (defenseMode ? 270 : 0)
+        switch (playerOrientation) {
+            case UpDownOrientation.Down:
+                rotation += 180
+                break
+            case UpDownOrientation.Up:
+                break
+        }
+        image.style.transform = `rotate(${rotation}deg)`
+        cell.appendChild(image)
     }
-    image.style.transform = `rotate(${rotation}deg)`
-    cell.appendChild(image)
+
     return cell
 }
-
-let createMonsterCard = function (id: string, playerOrientation: UpDownOrientation): HTMLElement {
-    let monster = new Monster(id);
-    let card = createCell(monster.getImageUrl(), playerOrientation, monster.isInDefensePosition());
-    card.style.position = 'relative'
+let createMonsterCard = function (
+    card: Card | undefined,
+    playerOrientation: UpDownOrientation,
+    defenseMode: boolean
+): HTMLElement {
+    if (card === undefined) {
+        return createCell(undefined, playerOrientation, defenseMode)
+    }
+    let cell = createCell(findCardPicture(card.id), playerOrientation, defenseMode)
+    cell.style.position = 'relative'
 
     let attack = document.createElement('p')
-    attack.innerHTML = String(monster.getAttack())
+    attack.innerHTML = String(card.originalAttack)
     attack.style.color = 'red'
 
     let defense = document.createElement('p')
-    defense.innerHTML = String(monster.getDefense())
+    defense.innerHTML = String(card.originalDefense)
     defense.style.color = 'blue'
 
     let overlay = document.createElement('div')
@@ -48,12 +156,17 @@ let createMonsterCard = function (id: string, playerOrientation: UpDownOrientati
     overlay.style.textAlign = 'center';
     overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
 
-    card.appendChild(overlay)
+    cell.appendChild(overlay)
 
-    return card;
+    return cell;
 }
 
-let setUpPlayer = function (board: HTMLTableElement, orientation: UpDownOrientation): void {
+let findCardPicture = function (passcode: Passcode): string {
+    return `https://ygoprodeck.com/pics/${passcode.toString()}.jpg`
+}
+
+let setUpPlayer = function (board: HTMLTableElement, orientation: UpDownOrientation,
+    state: FieldHalf): void {
     let appendChildren = function (to: HTMLElement, children: Array<HTMLElement>) {
         switch (orientation) {
             case UpDownOrientation.Down:
@@ -81,15 +194,24 @@ let setUpPlayer = function (board: HTMLTableElement, orientation: UpDownOrientat
     lowerRow.push(extraDeck)
 
     for (let i = 0; i < 5; ++i) {
-        let monsterZone = createMonsterCard('20', orientation)
-        upperRow.push(monsterZone)
-        monsterZone.style.width = cardHeight.toString() + "px"
+        {
+            let monsterZone = state.monsters[i]
+            let monsterZoneElement = createMonsterCard(
+                monsterZone.monster ? monsterZone.monster.card : undefined,
+                orientation,
+                monsterZone.inDefenseMode
+            )
+            upperRow.push(monsterZoneElement)
+            monsterZoneElement.style.width = cardHeight.toString() + "px"
+        }
 
-        let spellTrapZone = createCell((i % 2) ?
-            back :
-            "https://ygoprodeck.com/pics/55144522.jpg", orientation, false)
-        lowerRow.push(spellTrapZone)
-        spellTrapZone.style.width = cardHeight.toString() + "px"
+        let spellTrapZone = state.spellTraps[i]
+        let spellTrapZoneElement = createCell(
+            spellTrapZone.spellTrap ? (spellTrapZone.spellTrap.isFaceUp ? findCardPicture(spellTrapZone.spellTrap.card.id) : back) : undefined,
+            orientation,
+            false)
+        lowerRow.push(spellTrapZoneElement)
+        spellTrapZoneElement.style.width = cardHeight.toString() + "px"
     }
 
     let graveyard = createCell("https://ygoprodeck.com/pics/85936485.jpg", orientation, false)
@@ -116,9 +238,43 @@ let setUpPlayer = function (board: HTMLTableElement, orientation: UpDownOrientat
     appendChildren(board, player)
 }
 
+let createEmptyMonsterZones = function () {
+    let zones = new Array<MonsterZone>()
+    for (let i = 0; i < 5; ++i) {
+        zones.push(new MonsterZone(undefined, i % 2 === 0))
+    }
+    return zones
+}
+
+let createEmptySpellTrapZones = function () {
+    let zones = new Array<SpellTrapZone>()
+    for (let i = 0; i < 5; ++i) {
+        zones.push(new SpellTrapZone(undefined))
+    }
+    return zones
+}
+
 export function setUpBoard(): HTMLElement {
+    let field = new Field(
+        new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
+            new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
+            new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
+        new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
+            new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
+            new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
+        undefined,
+        undefined
+    )
+    let demoCard = new Card(new Passcode('85936485'), 1000, 400);
+
+    field.firstPlayer.monsters[2].monster = new FaceUpDownCardInstance(demoCard, true)
+    field.firstPlayer.spellTraps[0].spellTrap = new FaceUpDownCardInstance(demoCard, false)
+
+    field.secondPlayer.monsters[1].monster = new FaceUpDownCardInstance(demoCard, true)
+    field.secondPlayer.spellTraps[4].spellTrap = new FaceUpDownCardInstance(demoCard, false)
+
     let board = document.createElement("table")
-    setUpPlayer(board, UpDownOrientation.Down)
+    setUpPlayer(board, UpDownOrientation.Down, field.firstPlayer)
     {
         let tr = document.createElement("tr")
         for (let i = 0; i < 7; ++i) {
@@ -137,6 +293,6 @@ export function setUpBoard(): HTMLElement {
         }
         board.appendChild(tr)
     }
-    setUpPlayer(board, UpDownOrientation.Up)
+    setUpPlayer(board, UpDownOrientation.Up, field.secondPlayer)
     return board
 }
