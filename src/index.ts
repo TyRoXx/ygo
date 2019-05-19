@@ -59,11 +59,17 @@ class Hand {
     }
 }
 
+class Deck {
+    constructor(public contents: Array<Card>) {
+    }
+}
+
 class Player {
     constructor(
         public field: FieldHalf,
         public life: Number,
-        public hand: Hand) {
+        public hand: Hand,
+        public deck : Deck) {
     }
 }
 
@@ -200,8 +206,9 @@ let findCardPicture = function (passcode: Passcode): string {
 let setUpPlayer = function (
     board: HTMLTableElement,
     orientation: UpDownOrientation,
-    state: FieldHalf
+    playerState: Player
 ): void {
+    let field = playerState.field
     let appendChildren = function (to: HTMLElement, children: Array<HTMLElement>) {
         switch (orientation) {
             case UpDownOrientation.Down:
@@ -230,7 +237,7 @@ let setUpPlayer = function (
 
     for (let i = 0; i < 5; ++i) {
         {
-            let monsterZone = state.monsters[i]
+            let monsterZone = field.monsters[i]
             let monsterZoneElement = createCard(
                 monsterZone.monster,
                 orientation,
@@ -241,7 +248,7 @@ let setUpPlayer = function (
             monsterZoneElement.style.width = cardHeight.toString() + "px"
         }
 
-        let spellTrap = state.spellTraps[i].spellTrap;
+        let spellTrap = field.spellTraps[i].spellTrap;
         let spellTrapZoneElement;
         if (spellTrap === undefined) {
             spellTrapZoneElement = createCell(undefined, orientation, false)
@@ -252,12 +259,12 @@ let setUpPlayer = function (
         spellTrapZoneElement.style.width = cardHeight.toString() + "px"
     }
 
-    let graveyard = createCell((state.graveyard.contents.length > 0) ? findCardPicture(state.graveyard.contents[
-        state.graveyard.contents.length - 1
+    let graveyard = createCell((field.graveyard.contents.length > 0) ? findCardPicture(field.graveyard.contents[
+        field.graveyard.contents.length - 1
     ].card.id) : undefined, orientation, false)
     upperRow.push(graveyard)
 
-    let deck = createCell(back, orientation, false)
+    let deck = createCell((playerState.deck.contents.length > 0) ? back : undefined, orientation, false)
     lowerRow.push(deck)
 
     let banished = createCell("https://ygoprodeck.com/pics/85936485.jpg", orientation, false)
@@ -304,30 +311,32 @@ function setUpBoard(): HTMLElement {
         'The people that gather to swear to fight their oppressors. A revolution is coming'
     );
 
-    let state = new GameState(
-        [
-            new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
-                new FieldSpellZone(undefined), new Graveyard([new CardInstance(demoMonster)]),
-                new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
-                8000,
-                new Hand([])),
-            new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
-                new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
-                new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
-                8000,
-                new Hand([]))
-        ],
-        0,
-        Phase.Main1,
-        [new ExtraMonsterZone(-1, undefined), new ExtraMonsterZone(-1, undefined)]
-    )
-
     let demoSpell = new Card(
         new Passcode('02314238'),
         'Dark Magic Attack',
         0, 0,
         'Normal',
         'If you control "Dark Magician": Destroy all Spell and Trap Cards your opponent controls.'
+    )
+
+    let state = new GameState(
+        [
+            new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
+                new FieldSpellZone(undefined), new Graveyard([new CardInstance(demoMonster)]),
+                new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
+                8000,
+                new Hand([]),
+                new Deck([])),
+            new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
+                new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
+                new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
+                8000,
+                new Hand([]),
+                new Deck([demoSpell]))
+        ],
+        0,
+        Phase.Main1,
+        [new ExtraMonsterZone(-1, undefined), new ExtraMonsterZone(-1, undefined)]
     )
 
     let extraMonster = new Card(
@@ -356,7 +365,7 @@ function setUpBoard(): HTMLElement {
     ))
 
     let board = document.createElement("table")
-    setUpPlayer(board, UpDownOrientation.Down, state.players[0].field)
+    setUpPlayer(board, UpDownOrientation.Down, state.players[0])
     {
         let tr = document.createElement("tr")
         for (let i = 0; i < 9; ++i) {
@@ -380,7 +389,7 @@ function setUpBoard(): HTMLElement {
         }
         board.appendChild(tr)
     }
-    setUpPlayer(board, UpDownOrientation.Up, state.players[1].field)
+    setUpPlayer(board, UpDownOrientation.Up, state.players[1])
 
     board.appendChild(popupElement)
     return board
