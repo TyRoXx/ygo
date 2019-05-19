@@ -62,7 +62,6 @@ class Hand {
 class Player {
     constructor(
         public field: FieldHalf,
-        public extraZone: FaceUpDownCardInstance | undefined,
         public life: Number,
         public hand: Hand) {
     }
@@ -82,16 +81,25 @@ enum Phase {
     End
 }
 
+class ExtraMonsterZone {
+    constructor(public owner: Number, public monster: FaceUpDownCardInstance | undefined) {
+    }
+}
+
 class GameState {
     constructor(
         public players: Array<Player>,
         public turnPlayer: Number,
-        public phase: Phase) {
+        public phase: Phase,
+        public extraMonsterZones: Array<ExtraMonsterZone>) {
         if (players.length != 2) {
             throw new Error("Unsupported number of players")
         }
         if (turnPlayer < 0 || turnPlayer >= players.length) {
             throw new Error("Invalid turn player index")
+        }
+        if (extraMonsterZones.length != 2) {
+            throw new Error("Unsupported number of extra monster zones")
         }
     }
 }
@@ -290,18 +298,17 @@ function setUpBoard(): HTMLElement {
             new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
                 new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
                 new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
-                undefined,
                 8000,
                 new Hand([])),
             new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
                 new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
                 new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
-                undefined,
                 8000,
                 new Hand([]))
         ],
         0,
-        Phase.Main1
+        Phase.Main1,
+        [new ExtraMonsterZone(-1, undefined), new ExtraMonsterZone(-1, undefined)]
     )
 
     let demoMonster = new Card(
@@ -334,17 +341,17 @@ function setUpBoard(): HTMLElement {
     state.players[0].field.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, false)
     state.players[0].field.monsters[1].inDefenseMode = true
     state.players[0].field.spellTraps[0].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
-    state.players[0].extraZone = new FaceUpDownCardInstance(
+    state.extraMonsterZones[1] = new ExtraMonsterZone(0, new FaceUpDownCardInstance(
         extraMonster,
         true
-    )
+    ))
 
     state.players[1].field.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, true)
     state.players[1].field.spellTraps[3].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
-    state.players[1].extraZone = new FaceUpDownCardInstance(
+    state.extraMonsterZones[0] = new ExtraMonsterZone(1, new FaceUpDownCardInstance(
         extraMonster,
         true
-    )
+    ))
 
     let board = document.createElement("table")
     setUpPlayer(board, UpDownOrientation.Down, state.players[0].field)
@@ -354,15 +361,15 @@ function setUpBoard(): HTMLElement {
             switch (i) {
                 case 3:
                 case 5:
-                    let extraMonsterInstance = state.players[(i == 3) ? 0 : 1].extraZone
-                    let extraMonsterZone = createCard(
-                        extraMonsterInstance,
-                        (i == 3) ? UpDownOrientation.Down : UpDownOrientation.Up,
+                    let extraMonsterZone = state.extraMonsterZones[(i === 3) ? 0 : 1]
+                    let extraMonsterZoneElement = createCard(
+                        extraMonsterZone.monster,
+                        (extraMonsterZone.owner === 0) ? UpDownOrientation.Down : UpDownOrientation.Up,
                         false,
                         true
                     )
-                    tr.appendChild(extraMonsterZone)
-                    extraMonsterZone.style.width = cardHeight.toString() + "px"
+                    tr.appendChild(extraMonsterZoneElement)
+                    extraMonsterZoneElement.style.width = cardHeight.toString() + "px"
                     break
 
                 default:
