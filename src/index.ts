@@ -3,41 +3,6 @@ function isPasscode(value: string): boolean {
     return (value.length == 8)
 }
 
-class Passcode {
-    constructor(private value: string) {
-        if (!isPasscode(value)) {
-            throw new Error("Passcode expected: " + value)
-        }
-    }
-
-    toString(): string {
-        return this.value
-    }
-}
-
-class Card {
-    constructor(
-        public id: Passcode,
-        public name: string,
-        public originalAttack: Number,
-        public originalDefense: Number,
-        public type: string,
-        public description: string
-    ) {
-    }
-}
-
-class CardInstance {
-    constructor(public card: Card) {
-    }
-}
-
-class FaceUpDownCardInstance extends CardInstance {
-    constructor(card: Card, public isFaceUp: boolean) {
-        super(card)
-    }
-}
-
 class Graveyard {
     constructor(public contents: Array<CardInstance>) {
     }
@@ -86,10 +51,6 @@ enum Phase {
     End
 }
 
-class ExtraMonsterZone {
-    constructor(public owner: Number, public monster: FaceUpDownCardInstance | undefined) {
-    }
-}
 
 class GameState {
     constructor(
@@ -228,9 +189,8 @@ let setUpPlayer = function(
 
     let back = "https://vignette.wikia.nocookie.net/yugioh/images/e/e5/Back-EN.png/revision/latest?cb=20100726082133"
 
-    let fieldSpell = createCell(
-        field.fieldSpell.fieldSpell ? (field.fieldSpell.fieldSpell.isFaceUp ? findCardPicture(field.fieldSpell.fieldSpell.card.id) : back) : undefined,
-        orientation, false)
+    let fieldSpellCard = field.fieldSpell.fieldSpell
+    let fieldSpell = createCard(fieldSpellCard, orientation, false, false)
     upperRow.push(fieldSpell)
 
     let extraDeck = createCell((playerState.field.extraDeck.contents.length > 0) ? back : undefined, orientation, false)

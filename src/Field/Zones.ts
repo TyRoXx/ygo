@@ -3,6 +3,11 @@ class MonsterZone {
     }
 }
 
+class ExtraMonsterZone {
+    constructor(public owner: Number, public monster: FaceUpDownCardInstance | undefined) {
+    }
+}
+
 class SpellTrapZone {
     constructor(public spellTrap: FaceUpDownCardInstance | undefined) {
     }
