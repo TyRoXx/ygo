@@ -357,7 +357,7 @@ function setUpBoard(): HTMLElement {
     setUpPlayer(board, UpDownOrientation.Down, state.players[0].field)
     {
         let tr = document.createElement("tr")
-        for (let i = 0; i < 7; ++i) {
+        for (let i = 0; i < 9; ++i) {
             switch (i) {
                 case 3:
                 case 5:
