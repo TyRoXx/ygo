@@ -264,6 +264,28 @@ let createEmptySpellTrapZones = function() {
     return zones
 }
 
+let createHand = function(hand: Hand): HTMLElement {
+    let container = document.createElement('div')
+    container.style.textAlign = 'center'
+
+    let cardList = document.createElement('div');
+    cardList.style.marginTop = '20px';
+    cardList.style.display = 'inline-block'
+    hand.contents.forEach(card => {
+        cardList.appendChild(
+            createCard(
+                new FaceUpDownCardInstance(card, true),
+                UpDownOrientation.Up,
+                false,
+                false
+            )
+        );
+    })
+    container.appendChild(cardList);
+
+    return container;
+}
+
 function setUpBoard(): HTMLElement {
     let demoMonster = new Card(
         new Passcode('85936485'),
@@ -305,13 +327,13 @@ function setUpBoard(): HTMLElement {
                 new FieldSpellZone(undefined), new Graveyard([new CardInstance(demoMonster)]),
                 new ExtraDeck(new Array<CardInstance>()), new Banished([new FaceUpDownCardInstance(demoSpell, true)])),
                 8000,
-                new Hand([]),
+                new Hand([demoMonster]),
                 new Deck([])),
             new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
                 new FieldSpellZone(new FaceUpDownCardInstance(demoFieldSpell, true)), new Graveyard(new Array<CardInstance>()),
                 new ExtraDeck([new CardInstance(extraMonster)]), new Banished(new Array<FaceUpDownCardInstance>())),
                 8000,
-                new Hand([]),
+                new Hand([demoMonster]),
                 new Deck([demoSpell]))
         ],
         0,
@@ -338,11 +360,12 @@ function setUpBoard(): HTMLElement {
     let body = document.createElement('div')
     body.style.display = 'flex';
     body.style.alignItems = 'stretch';
-    let left = document.createElement('div')
-    left.style.background = 'silver';
-    left.style.cssFloat = 'left';
-    left.style.minWidth = '1300px'
+    let leftPane = document.createElement('div')
+    leftPane.style.background = 'silver';
+    leftPane.style.cssFloat = 'left';
+    leftPane.style.minWidth = '1300px'
 
+    leftPane.appendChild(createHand(state.players[0].hand))
     let board = document.createElement("table")
     setUpPlayer(board, UpDownOrientation.Down, state.players[0])
     {
@@ -369,15 +392,18 @@ function setUpBoard(): HTMLElement {
         board.appendChild(tr)
     }
     setUpPlayer(board, UpDownOrientation.Up, state.players[1])
+    leftPane.appendChild(board)
+
+    leftPane.appendChild(createHand(state.players[1].hand))
+
     rightPane = document.createElement('div')
     rightPane.appendChild(createParagraph('Card info'))
     rightPane.style.backgroundColor = 'gold'
     rightPane.style.width = '100%'
     rightPane.style.padding = '5px 10px'
+    rightPane.style.minWidth = '10em'
 
-    left.appendChild(board)
-
-    body.appendChild(left)
+    body.appendChild(leftPane)
     body.appendChild(rightPane)
     return body
 }
