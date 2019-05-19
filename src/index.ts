@@ -155,7 +155,19 @@ let createCard = function(
     cell.addEventListener('mousemove', (e): void => {
         rightPane.style.display = 'block';
         let rightPaneElement = rightPane.children[0]
-        rightPaneElement.innerHTML = `<h2>${card.name}</h2><b>${card.type}</b><br />${card.description}`;
+        let name = document.createElement("h2")
+        name.innerText = card.name
+        let type = document.createElement("b")
+        type.innerText = card.type
+        while (rightPaneElement.firstChild) {
+            rightPaneElement.removeChild(rightPaneElement.firstChild);
+        }
+        rightPaneElement.append(
+            name,
+            type,
+            document.createElement("br"),
+            document.createTextNode(card.description)
+        )
     });
     cell.addEventListener('mouseout', () => rightPane.style.display = 'none')
 
