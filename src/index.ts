@@ -1,3 +1,5 @@
+let popupElement = document.createElement('div');
+
 function isPasscode(value: string): boolean {
     return (value.length == 8)
 }
@@ -15,7 +17,14 @@ class Passcode {
 }
 
 class Card {
-    constructor(public id: Passcode, public originalAttack: Number, public originalDefense: Number) {
+    constructor(
+        public id: Passcode,
+        public name: string,
+        public originalAttack: Number,
+        public originalDefense: Number,
+        public type: string,
+        public description: string
+    ) {
     }
 }
 
@@ -78,15 +87,23 @@ let createCell = function (
 
     return cell
 }
-let createMonsterCard = function (
-    card: Card | undefined,
+
+let createCard = function (
+    cardInstance: FaceUpDownCardInstance | undefined,
     playerOrientation: UpDownOrientation,
     defenseMode: boolean
 ): HTMLElement {
-    if (card === undefined) {
+    if (cardInstance === undefined) {
         return createCell(undefined, playerOrientation, defenseMode)
     }
-    let cell = createCell(findCardPicture(card.id), playerOrientation, defenseMode)
+
+    let card = cardInstance.card;
+    let cell;
+    if (cardInstance.isFaceUp) {
+        cell = createCell(findCardPicture(card.id), playerOrientation, defenseMode)
+    } else {
+        cell = createCell("https://vignette.wikia.nocookie.net/yugioh/images/e/e5/Back-EN.png/revision/latest?cb=20100726082133", playerOrientation, defenseMode)
+    }
     cell.style.position = 'relative'
 
     let attack = document.createElement('p')
@@ -106,8 +123,19 @@ let createMonsterCard = function (
     overlay.style.zIndex = '10';
     overlay.style.textAlign = 'center';
     overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
-
     cell.appendChild(overlay)
+
+    cell.addEventListener('mousemove', (e): void => {
+        popupElement.innerHTML = `<h2>${card.name}</h2><b>${card.type}</b><br />${card.description}`;
+        popupElement.style.position = "fixed"
+        popupElement.style.display = 'block'
+        popupElement.style.zIndex = '20'
+        popupElement.style.backgroundColor = 'gold'
+        popupElement.style.padding = '0.5em'
+        popupElement.style.left = (e.clientX + 20) + "px"
+        popupElement.style.top = (e.clientY + 20) + "px"
+    });
+    cell.addEventListener('mouseout', () => popupElement.style.display = 'none')
 
     return cell;
 }
@@ -150,8 +178,8 @@ let setUpPlayer = function (
     for (let i = 0; i < 5; ++i) {
         {
             let monsterZone = state.monsters[i]
-            let monsterZoneElement = createMonsterCard(
-                monsterZone.monster ? monsterZone.monster.card : undefined,
+            let monsterZoneElement = createCard(
+                monsterZone.monster,
                 orientation,
                 monsterZone.inDefenseMode
             )
@@ -159,11 +187,13 @@ let setUpPlayer = function (
             monsterZoneElement.style.width = cardHeight.toString() + "px"
         }
 
-        let spellTrapZone = state.spellTraps[i]
-        let spellTrapZoneElement = createCell(
-            spellTrapZone.spellTrap ? (spellTrapZone.spellTrap.isFaceUp ? findCardPicture(spellTrapZone.spellTrap.card.id) : back) : undefined,
-            orientation,
-            false)
+        let spellTrap = state.spellTraps[i].spellTrap;
+        let spellTrapZoneElement;
+        if (spellTrap === undefined) {
+            spellTrapZoneElement = createCell(undefined, orientation, false)
+        } else {
+            spellTrapZoneElement = createCard(spellTrap, orientation, false)
+        }
         lowerRow.push(spellTrapZoneElement)
         spellTrapZoneElement.style.width = cardHeight.toString() + "px"
     }
@@ -219,13 +249,29 @@ function setUpBoard(): HTMLElement {
         undefined,
         undefined
     )
-    let demoCard = new Card(new Passcode('85936485'), 1000, 400);
 
-    field.firstPlayer.monsters[2].monster = new FaceUpDownCardInstance(demoCard, true)
-    field.firstPlayer.spellTraps[0].spellTrap = new FaceUpDownCardInstance(demoCard, false)
+    let demoMonster = new Card(
+        new Passcode('85936485'),
+        'United Resistance',
+        1000,
+        400,
+        'Thunder',
+        'The people that gather to swear to fight their oppressors. A revolution is coming'
+    );
 
-    field.secondPlayer.monsters[1].monster = new FaceUpDownCardInstance(demoCard, true)
-    field.secondPlayer.spellTraps[4].spellTrap = new FaceUpDownCardInstance(demoCard, false)
+    let demoSpell = new Card(
+        new Passcode('02314238'),
+        'Dark Magic Attack',
+        0, 0,
+        'Normal',
+        'If you control "Dark Magician": Destroy all Spell and Trap Cards your opponent controls.'
+    )
+
+    field.firstPlayer.monsters[2].monster = new FaceUpDownCardInstance(demoMonster, true)
+    field.firstPlayer.spellTraps[0].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
+
+    field.secondPlayer.monsters[1].monster = new FaceUpDownCardInstance(demoMonster, true)
+    field.secondPlayer.spellTraps[4].spellTrap = new FaceUpDownCardInstance(demoSpell, false)
 
     let board = document.createElement("table")
     setUpPlayer(board, UpDownOrientation.Down, field.firstPlayer)
@@ -235,8 +281,22 @@ function setUpBoard(): HTMLElement {
             switch (i) {
                 case 3:
                 case 5:
-                    let extraMonsterZone = createCell("https://ygoprodeck.com/pics/23995346.jpg",
-                        (i == 3) ? UpDownOrientation.Down : UpDownOrientation.Up, false)
+                    let extraMonster = new Card(
+                        new Passcode('23995346'),
+                        'Ultimate Blue Eyed Dragon',
+                        4500,
+                        3800,
+                        'Dragon/Fusion',
+                        '"Blue-Eyes White Dragon" * 3'
+                    )
+                    let extraMonsterZone = createCard(
+                        new FaceUpDownCardInstance(
+                            extraMonster,
+                            true
+                        ),
+                        (i == 3) ? UpDownOrientation.Down : UpDownOrientation.Up,
+                        false
+                    )
                     tr.appendChild(extraMonsterZone)
                     extraMonsterZone.style.width = cardHeight.toString() + "px"
                     break
@@ -248,5 +308,7 @@ function setUpBoard(): HTMLElement {
         board.appendChild(tr)
     }
     setUpPlayer(board, UpDownOrientation.Up, field.secondPlayer)
+
+    board.appendChild(popupElement)
     return board
 }
