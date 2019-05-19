@@ -119,7 +119,7 @@ let createCard = function(
     }
 
     let card = cardInstance.card;
-    let cell;
+    let cell: HTMLElement;
     if (cardInstance.isFaceUp) {
         cell = createCell(findCardPicture(card.id), playerOrientation, defenseMode)
     } else {
@@ -131,10 +131,14 @@ let createCard = function(
         let attack = document.createElement('p')
         attack.innerHTML = String(card.originalAttack)
         attack.style.color = 'red'
+        attack.style.padding = "0"
+        attack.style.margin = "0"
 
         let defense = document.createElement('p')
         defense.innerHTML = String(card.originalDefense)
         defense.style.color = 'blue'
+        defense.style.padding = "0"
+        defense.style.margin = "0"
 
         let overlay = document.createElement('div')
         overlay.appendChild(attack);
