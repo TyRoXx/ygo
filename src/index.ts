@@ -91,7 +91,8 @@ let createCell = function (
 let createCard = function (
     cardInstance: FaceUpDownCardInstance | undefined,
     playerOrientation: UpDownOrientation,
-    defenseMode: boolean
+    defenseMode: boolean,
+    isMonsterZone: boolean
 ): HTMLElement {
     if (cardInstance === undefined) {
         return createCell(undefined, playerOrientation, defenseMode)
@@ -106,24 +107,26 @@ let createCard = function (
     }
     cell.style.position = 'relative'
 
-    let attack = document.createElement('p')
-    attack.innerHTML = String(card.originalAttack)
-    attack.style.color = 'red'
+    if (isMonsterZone) {
+        let attack = document.createElement('p')
+        attack.innerHTML = String(card.originalAttack)
+        attack.style.color = 'red'
 
-    let defense = document.createElement('p')
-    defense.innerHTML = String(card.originalDefense)
-    defense.style.color = 'blue'
+        let defense = document.createElement('p')
+        defense.innerHTML = String(card.originalDefense)
+        defense.style.color = 'blue'
 
-    let overlay = document.createElement('div')
-    overlay.appendChild(attack);
-    overlay.appendChild(defense);
-    overlay.style.position = 'absolute';
-    overlay.style.top = '0px'
-    overlay.style.width = '100%';
-    overlay.style.zIndex = '10';
-    overlay.style.textAlign = 'center';
-    overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
-    cell.appendChild(overlay)
+        let overlay = document.createElement('div')
+        overlay.appendChild(attack);
+        overlay.appendChild(defense);
+        overlay.style.position = 'absolute';
+        overlay.style.top = '0px'
+        overlay.style.width = '100%';
+        overlay.style.zIndex = '10';
+        overlay.style.textAlign = 'center';
+        overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+        cell.appendChild(overlay)
+    }
 
     cell.addEventListener('mousemove', (e): void => {
         popupElement.innerHTML = `<h2>${card.name}</h2><b>${card.type}</b><br />${card.description}`;
@@ -181,7 +184,8 @@ let setUpPlayer = function (
             let monsterZoneElement = createCard(
                 monsterZone.monster,
                 orientation,
-                monsterZone.inDefenseMode
+                monsterZone.inDefenseMode,
+                true
             )
             upperRow.push(monsterZoneElement)
             monsterZoneElement.style.width = cardHeight.toString() + "px"
@@ -192,7 +196,7 @@ let setUpPlayer = function (
         if (spellTrap === undefined) {
             spellTrapZoneElement = createCell(undefined, orientation, false)
         } else {
-            spellTrapZoneElement = createCard(spellTrap, orientation, false)
+            spellTrapZoneElement = createCard(spellTrap, orientation, false, false)
         }
         lowerRow.push(spellTrapZoneElement)
         spellTrapZoneElement.style.width = cardHeight.toString() + "px"
@@ -295,7 +299,8 @@ function setUpBoard(): HTMLElement {
                             true
                         ),
                         (i == 3) ? UpDownOrientation.Down : UpDownOrientation.Up,
-                        false
+                        false,
+                        true
                     )
                     tr.appendChild(extraMonsterZone)
                     extraMonsterZone.style.width = cardHeight.toString() + "px"
