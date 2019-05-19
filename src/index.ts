@@ -234,7 +234,9 @@ let setUpPlayer = function (
 
     let back = "https://vignette.wikia.nocookie.net/yugioh/images/e/e5/Back-EN.png/revision/latest?cb=20100726082133"
 
-    let fieldSpell = createCell(back, orientation, false)
+    let fieldSpell = createCell(
+        field.fieldSpell.fieldSpell ? (field.fieldSpell.fieldSpell.isFaceUp ? findCardPicture(field.fieldSpell.fieldSpell.card.id) : back) : undefined,
+        orientation, false)
     upperRow.push(fieldSpell)
 
     let extraDeck = createCell(back, orientation, false)
@@ -326,6 +328,14 @@ function setUpBoard(): HTMLElement {
         'If you control "Dark Magician": Destroy all Spell and Trap Cards your opponent controls.'
     )
 
+    let demoFieldSpell = new Card(
+        new Passcode('79698395'),
+        'Realm of Danger!',
+        0, 0,
+        'Normal',
+        'Your opponent cannot target “Danger!” monsters you control with card effects during the turn they are Special Summoned. Once per turn: you can target 1 “Danger!” monster you control; while you control that faceup monster and this faceup card, that monster can attack your opponent directly, also your opponent’s monsters cannot target it for attacks, but it does not prevent your opponent from attacking you directly.'
+    )
+
     let state = new GameState(
         [
             new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
@@ -335,7 +345,7 @@ function setUpBoard(): HTMLElement {
                 new Hand([]),
                 new Deck([])),
             new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
-                new FieldSpellZone(undefined), new Graveyard(new Array<CardInstance>()),
+                new FieldSpellZone(new FaceUpDownCardInstance(demoFieldSpell, true)), new Graveyard(new Array<CardInstance>()),
                 new ExtraDeck(new Array<CardInstance>()), new Banished(new Array<FaceUpDownCardInstance>())),
                 8000,
                 new Hand([]),
