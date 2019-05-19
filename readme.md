@@ -15,3 +15,8 @@ Compile
 ```
 ./build.sh && firefox index.html
 ```
+
+For automatic rebuilds:
+```
+npm run-script watch
+```
