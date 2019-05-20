@@ -9,10 +9,13 @@
     "typescript": "^3.4.5"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.13",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
     "typescript-formatter": "^7.2.2"
   },
   "scripts": {
-    "test": "./node_modules/.bin/tsc -p test && node build/test/index.test.js",
+    "test": "npx jest",
     "build": "./node_modules/.bin/tsc -p src",
     "watch": "./node_modules/.bin/tsc -w -p src",
     "format": "find src/ test/ -regex '.*.ts' | xargs ./node_modules/.bin/tsfmt -r"
