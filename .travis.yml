@@ -5,5 +5,5 @@ cache: npm
 script:
 - npm test
 - ./build.sh
-- ./format.sh
-
+# fail the build if the code is not formatted
+- ./format.sh && git diff --exit-code
