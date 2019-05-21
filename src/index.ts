@@ -62,7 +62,7 @@ const enum UpDownOrientation {
     Down
 }
 
-const cardHeight = 153
+const cardHeight = 102
 
 let createCell = function(
     imageUrl: string | undefined,
