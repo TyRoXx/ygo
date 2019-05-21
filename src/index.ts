@@ -62,7 +62,7 @@ const enum UpDownOrientation {
 
 const cardHeight = 102
 
-let createCell = function (
+let createCell = function(
     imageUrl: string | undefined,
     playerOrientation: UpDownOrientation,
     defenseMode: boolean
@@ -93,7 +93,7 @@ let createCell = function (
     return cell
 }
 
-let createCard = function (
+let createCard = function(
     cardInstance: FaceUpDownCardInstance | undefined,
     playerOrientation: UpDownOrientation,
     defenseMode: boolean,
@@ -159,19 +159,19 @@ let createCard = function (
     return cell;
 }
 
-let findCardPicture = function (passcode: Passcode): string {
+let findCardPicture = function(passcode: Passcode): string {
     let withoutLeadingZero = parseInt(passcode.toString(), 10).toString()
     return `https://ygoprodeck.com/pics/${withoutLeadingZero}.jpg`
 }
 
-let setUpPlayer = function (
+let setUpPlayer = function(
     board: HTMLTableElement,
     orientation: UpDownOrientation,
     playerState: Player,
     rightPane: HTMLElement
 ): void {
     let field = playerState.field
-    let appendChildren = function (to: HTMLElement, children: Array<HTMLElement>) {
+    let appendChildren = function(to: HTMLElement, children: Array<HTMLElement>) {
         switch (orientation) {
             case UpDownOrientation.Down:
                 children = children.slice(0).reverse()
@@ -250,7 +250,7 @@ let setUpPlayer = function (
     appendChildren(board, player)
 }
 
-let createEmptyMonsterZones = function () {
+let createEmptyMonsterZones = function() {
     let zones = new Array<MonsterZone>()
     for (let i = 0; i < 5; ++i) {
         zones.push(new MonsterZone(undefined, i % 2 === 0))
@@ -258,7 +258,7 @@ let createEmptyMonsterZones = function () {
     return zones
 }
 
-let createEmptySpellTrapZones = function () {
+let createEmptySpellTrapZones = function() {
     let zones = new Array<SpellTrapZone>()
     for (let i = 0; i < 5; ++i) {
         zones.push(new SpellTrapZone(undefined))
@@ -266,7 +266,7 @@ let createEmptySpellTrapZones = function () {
     return zones
 }
 
-let createHand = function (hand: Hand, rightPane: HTMLElement): HTMLElement {
+let createHand = function(hand: Hand, rightPane: HTMLElement): HTMLElement {
     let container = document.createElement('div')
     container.style.textAlign = 'center'
 

@@ -1,5 +1,5 @@
-import {MonsterZone, SpellTrapZone, FieldSpellZone} from './Zones'
-import {CardInstance, FaceUpDownCardInstance} from '../Card/Card'
+import { MonsterZone, SpellTrapZone, FieldSpellZone } from './Zones'
+import { CardInstance, FaceUpDownCardInstance } from '../Card/Card'
 
 export class Graveyard {
     constructor(public contents: Array<CardInstance>) {

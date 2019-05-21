@@ -1,4 +1,4 @@
-import {FaceUpDownCardInstance} from '../Card/Card'
+import { FaceUpDownCardInstance } from '../Card/Card'
 
 export class MonsterZone {
     constructor(public monster: FaceUpDownCardInstance | undefined, public inDefenseMode: boolean) {
