@@ -3,13 +3,14 @@
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true,
-        "outFile": "../build/front-end.js",
+        "outDir": "../build/frontend",
         "noImplicitAny": true,
         "noImplicitThis": true,
         "alwaysStrict": true,
         "strictNullChecks": true,
         "strictFunctionTypes": true,
-        "lib": ["es2015", "dom"]
+        "lib": ["es2015", "dom"],
+        "module": "commonjs"
     },
     "includes": [
         "**"

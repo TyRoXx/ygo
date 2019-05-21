@@ -1,4 +1,8 @@
-class Passcode {
+function isPasscode(value: string): boolean {
+    return (value.length == 8)
+}
+
+export class Passcode {
     constructor(private value: string) {
         if (!isPasscode(value)) {
             throw new Error("Passcode expected: " + value)
@@ -10,7 +14,7 @@ class Passcode {
     }
 }
 
-class Card {
+export class Card {
     constructor(
         public id: Passcode,
         public name: string,
@@ -22,12 +26,12 @@ class Card {
     }
 }
 
-class CardInstance {
+export class CardInstance {
     constructor(public card: Card) {
     }
 }
 
-class FaceUpDownCardInstance extends CardInstance {
+export class FaceUpDownCardInstance extends CardInstance {
     constructor(card: Card, public isFaceUp: boolean) {
         super(card)
     }

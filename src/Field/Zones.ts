@@ -1,19 +1,21 @@
-class MonsterZone {
+import {FaceUpDownCardInstance} from '../Card/Card'
+
+export class MonsterZone {
     constructor(public monster: FaceUpDownCardInstance | undefined, public inDefenseMode: boolean) {
     }
 }
 
-class ExtraMonsterZone {
+export class ExtraMonsterZone {
     constructor(public owner: Number, public monster: FaceUpDownCardInstance | undefined) {
     }
 }
 
-class SpellTrapZone {
+export class SpellTrapZone {
     constructor(public spellTrap: FaceUpDownCardInstance | undefined) {
     }
 }
 
-class FieldSpellZone {
+export class FieldSpellZone {
     constructor(public fieldSpell: FaceUpDownCardInstance | undefined) {
     }
 }

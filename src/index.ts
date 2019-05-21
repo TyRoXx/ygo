@@ -1,22 +1,9 @@
+import {CardInstance, FaceUpDownCardInstance, Card, Passcode} from './Card/Card'
+import {FieldHalf, Banished, Graveyard, ExtraDeck} from './Field/Field'
+import {ExtraMonsterZone, MonsterZone, SpellTrapZone, FieldSpellZone} from './Field/Zones'
+import {createParagraph} from './dom'
+
 let rightPane: HTMLElement;
-function isPasscode(value: string): boolean {
-    return (value.length == 8)
-}
-
-class Graveyard {
-    constructor(public contents: Array<CardInstance>) {
-    }
-}
-
-class ExtraDeck {
-    constructor(public contents: Array<CardInstance>) {
-    }
-}
-
-class Banished {
-    constructor(public contents: Array<FaceUpDownCardInstance>) {
-    }
-}
 
 class Hand {
     constructor(public contents: Array<Card>) {
@@ -422,3 +409,5 @@ function setUpBoard(): HTMLElement {
     body.appendChild(rightPane)
     return body
 }
+
+document.body.appendChild(setUpBoard())
