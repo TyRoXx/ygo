@@ -21,7 +21,7 @@
     "test": "./node_modules/.bin/jest",
     "build": "./node_modules/.bin/tsc -p src && ./node_modules/.bin/browserify build/frontend/index.js -o build/front-end.js -d",
     "watch": "./node_modules/.bin/tsc -w -p src",
-    "format": "find src/ test/ -regex '.*.ts' | xargs ./node_modules/.bin/tsfmt -r"
+    "format": "find src/ -regex '.*.ts' | xargs ./node_modules/.bin/tsfmt -r"
   },
   "repository": {
     "type": "git",

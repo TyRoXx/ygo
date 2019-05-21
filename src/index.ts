@@ -1,9 +1,7 @@
-import {CardInstance, FaceUpDownCardInstance, Card, Passcode} from './Card/Card'
-import {FieldHalf, Banished, Graveyard, ExtraDeck} from './Field/Field'
-import {ExtraMonsterZone, MonsterZone, SpellTrapZone, FieldSpellZone} from './Field/Zones'
-import {createParagraph} from './dom'
-
-let rightPane: HTMLElement;
+import { CardInstance, FaceUpDownCardInstance, Card, Passcode } from './Card/Card'
+import { FieldHalf, Banished, Graveyard, ExtraDeck } from './Field/Field'
+import { ExtraMonsterZone, MonsterZone, SpellTrapZone, FieldSpellZone } from './Field/Zones'
+import { createParagraph } from './dom'
 
 class Hand {
     constructor(public contents: Array<Card>) {
@@ -64,7 +62,7 @@ const enum UpDownOrientation {
 
 const cardHeight = 102
 
-let createCell = function(
+let createCell = function (
     imageUrl: string | undefined,
     playerOrientation: UpDownOrientation,
     defenseMode: boolean
@@ -95,11 +93,12 @@ let createCell = function(
     return cell
 }
 
-let createCard = function(
+let createCard = function (
     cardInstance: FaceUpDownCardInstance | undefined,
     playerOrientation: UpDownOrientation,
     defenseMode: boolean,
-    isMonsterZone: boolean
+    isMonsterZone: boolean,
+    rightPane: HTMLElement
 ): HTMLElement {
     if (cardInstance === undefined) {
         return createCell(undefined, playerOrientation, defenseMode)
@@ -160,18 +159,19 @@ let createCard = function(
     return cell;
 }
 
-let findCardPicture = function(passcode: Passcode): string {
+let findCardPicture = function (passcode: Passcode): string {
     let withoutLeadingZero = parseInt(passcode.toString(), 10).toString()
     return `https://ygoprodeck.com/pics/${withoutLeadingZero}.jpg`
 }
 
-let setUpPlayer = function(
+let setUpPlayer = function (
     board: HTMLTableElement,
     orientation: UpDownOrientation,
-    playerState: Player
+    playerState: Player,
+    rightPane: HTMLElement
 ): void {
     let field = playerState.field
-    let appendChildren = function(to: HTMLElement, children: Array<HTMLElement>) {
+    let appendChildren = function (to: HTMLElement, children: Array<HTMLElement>) {
         switch (orientation) {
             case UpDownOrientation.Down:
                 children = children.slice(0).reverse()
@@ -192,7 +192,7 @@ let setUpPlayer = function(
     let back = "https://vignette.wikia.nocookie.net/yugioh/images/e/e5/Back-EN.png/revision/latest?cb=20100726082133"
 
     let fieldSpellCard = field.fieldSpell.fieldSpell
-    let fieldSpell = createCard(fieldSpellCard, orientation, false, false)
+    let fieldSpell = createCard(fieldSpellCard, orientation, false, false, rightPane)
     upperRow.push(fieldSpell)
 
     let extraDeck = createCell((playerState.field.extraDeck.contents.length > 0) ? back : undefined, orientation, false)
@@ -205,7 +205,7 @@ let setUpPlayer = function(
                 monsterZone.monster,
                 orientation,
                 monsterZone.inDefenseMode,
-                true
+                true, rightPane
             )
             upperRow.push(monsterZoneElement)
             monsterZoneElement.style.width = cardHeight.toString() + "px"
@@ -216,7 +216,7 @@ let setUpPlayer = function(
         if (spellTrap === undefined) {
             spellTrapZoneElement = createCell(undefined, orientation, false)
         } else {
-            spellTrapZoneElement = createCard(spellTrap, orientation, false, false)
+            spellTrapZoneElement = createCard(spellTrap, orientation, false, false, rightPane)
         }
         lowerRow.push(spellTrapZoneElement)
         spellTrapZoneElement.style.width = cardHeight.toString() + "px"
@@ -250,7 +250,7 @@ let setUpPlayer = function(
     appendChildren(board, player)
 }
 
-let createEmptyMonsterZones = function() {
+let createEmptyMonsterZones = function () {
     let zones = new Array<MonsterZone>()
     for (let i = 0; i < 5; ++i) {
         zones.push(new MonsterZone(undefined, i % 2 === 0))
@@ -258,7 +258,7 @@ let createEmptyMonsterZones = function() {
     return zones
 }
 
-let createEmptySpellTrapZones = function() {
+let createEmptySpellTrapZones = function () {
     let zones = new Array<SpellTrapZone>()
     for (let i = 0; i < 5; ++i) {
         zones.push(new SpellTrapZone(undefined))
@@ -266,7 +266,7 @@ let createEmptySpellTrapZones = function() {
     return zones
 }
 
-let createHand = function(hand: Hand): HTMLElement {
+let createHand = function (hand: Hand, rightPane: HTMLElement): HTMLElement {
     let container = document.createElement('div')
     container.style.textAlign = 'center'
 
@@ -279,7 +279,7 @@ let createHand = function(hand: Hand): HTMLElement {
                 new FaceUpDownCardInstance(card, true),
                 UpDownOrientation.Up,
                 false,
-                false
+                false, rightPane
             )
         );
     })
@@ -289,6 +289,8 @@ let createHand = function(hand: Hand): HTMLElement {
 }
 
 function setUpBoard(): HTMLElement {
+    let rightPane: HTMLElement = document.createElement('div');
+
     let demoMonster = new Card(
         new Passcode('85936485'),
         'United Resistance',
@@ -367,9 +369,9 @@ function setUpBoard(): HTMLElement {
     leftPane.style.cssFloat = 'left';
     leftPane.style.minWidth = '1300px'
 
-    leftPane.appendChild(createHand(state.players[0].hand))
+    leftPane.appendChild(createHand(state.players[0].hand, rightPane))
     let board = document.createElement("table")
-    setUpPlayer(board, UpDownOrientation.Down, state.players[0])
+    setUpPlayer(board, UpDownOrientation.Down, state.players[0], rightPane)
     {
         let tr = document.createElement("tr")
         for (let i = 0; i < 9; ++i) {
@@ -381,7 +383,7 @@ function setUpBoard(): HTMLElement {
                         extraMonsterZone.monster,
                         (extraMonsterZone.owner === 0) ? UpDownOrientation.Down : UpDownOrientation.Up,
                         false,
-                        true
+                        true, rightPane
                     )
                     tr.appendChild(extraMonsterZoneElement)
                     extraMonsterZoneElement.style.width = cardHeight.toString() + "px"
@@ -393,12 +395,11 @@ function setUpBoard(): HTMLElement {
         }
         board.appendChild(tr)
     }
-    setUpPlayer(board, UpDownOrientation.Up, state.players[1])
+    setUpPlayer(board, UpDownOrientation.Up, state.players[1], rightPane)
     leftPane.appendChild(board)
 
-    leftPane.appendChild(createHand(state.players[1].hand))
+    leftPane.appendChild(createHand(state.players[1].hand, rightPane))
 
-    rightPane = document.createElement('div')
     rightPane.appendChild(createParagraph('Card info'))
     rightPane.style.backgroundColor = 'gold'
     rightPane.style.width = '100%'
