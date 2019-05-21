@@ -2,7 +2,9 @@
     "compilerOptions": {
         "removeComments": true,
         "preserveConstEnums": true,
-        "sourceMap": true,
+        "sourceMap": false,
+        "inlineSourceMap": true,
+        "inlineSources": true,
         "outDir": "../build/frontend",
         "noImplicitAny": true,
         "noImplicitThis": true,
