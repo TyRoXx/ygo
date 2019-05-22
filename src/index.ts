@@ -130,11 +130,9 @@ let createCard = function(
         let name = document.createElement("h2")
         name.innerText = card.name
         let stars = document.createElement('p')
-        stars.innerHTML = '';
         if (card.monster !== undefined) {
-            console.log(card.monster.level)
             for (let i = 0; i < card.monster.level; i++) {
-                stars.innerHTML += '&#9733;';
+                stars.textContent += '★';
             }
         }
         let type = document.createElement("b")
