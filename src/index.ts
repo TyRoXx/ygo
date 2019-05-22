@@ -1,26 +1,8 @@
 import { CardInstance, FaceUpDownCardInstance, Card, Passcode } from './Card/Card'
 import { FieldHalf, Banished, Graveyard, ExtraDeck } from './Field/Field'
 import { ExtraMonsterZone, MonsterZone, SpellTrapZone, FieldSpellZone } from './Field/Zones'
+import { Player, Hand, Deck } from './Player/Player';
 import { createParagraph } from './dom'
-
-class Hand {
-    constructor(public contents: Array<Card>) {
-    }
-}
-
-class Deck {
-    constructor(public contents: Array<Card>) {
-    }
-}
-
-class Player {
-    constructor(
-        public field: FieldHalf,
-        public life: Number,
-        public hand: Hand,
-        public deck: Deck) {
-    }
-}
 
 enum Phase {
     Draw,
@@ -35,7 +17,6 @@ enum Phase {
     Main2,
     End
 }
-
 
 class GameState {
     constructor(
@@ -130,7 +111,11 @@ let createCard = function(
         overlay.appendChild(attack);
         overlay.appendChild(defense);
         overlay.style.position = 'absolute';
-        overlay.style.top = '0px'
+        if (playerOrientation === UpDownOrientation.Up) {
+            overlay.style.bottom = '0px'
+        } else {
+            overlay.style.top = '0px'
+        }
         overlay.style.width = '100%';
         overlay.style.zIndex = '10';
         overlay.style.textAlign = 'center';
@@ -205,7 +190,8 @@ let setUpPlayer = function(
                 monsterZone.monster,
                 orientation,
                 monsterZone.inDefenseMode,
-                true, rightPane
+                true,
+                rightPane
             )
             upperRow.push(monsterZoneElement)
             monsterZoneElement.style.width = cardHeight.toString() + "px"
@@ -222,17 +208,20 @@ let setUpPlayer = function(
         spellTrapZoneElement.style.width = cardHeight.toString() + "px"
     }
 
-    let graveyard = createCell((field.graveyard.contents.length > 0) ? findCardPicture(field.graveyard.contents[
-        field.graveyard.contents.length - 1
-    ].card.id) : undefined, orientation, false)
+    let graveyard = createCell((field.graveyard.contents.length > 0)
+        ? findCardPicture(field.graveyard.contents[field.graveyard.contents.length - 1].card.id)
+        : undefined, orientation, false)
     upperRow.push(graveyard)
 
-    let deck = createCell((playerState.deck.contents.length > 0) ? back : undefined, orientation, false)
+    let deck = createCell((playerState.deck.contents.length > 0)
+        ? back
+        : undefined, orientation, false)
     lowerRow.push(deck)
 
-    let banished = createCell((field.banished.contents.length > 0) ? findCardPicture(field.banished.contents[
-        field.banished.contents.length - 1
-    ].card.id) : undefined, orientation, false)
+    let banished = createCell((field.banished.contents.length > 0)
+        ? findCardPicture(field.banished.contents[field.banished.contents.length - 1].card.id)
+        : undefined, orientation, false)
+
     upperRow.push(banished)
     lowerRow.push(document.createElement("td"))
 
@@ -327,18 +316,22 @@ function setUpBoard(): HTMLElement {
 
     let state = new GameState(
         [
-            new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
-                new FieldSpellZone(undefined), new Graveyard([new CardInstance(demoMonster)]),
-                new ExtraDeck(new Array<CardInstance>()), new Banished([new FaceUpDownCardInstance(demoSpell, true)])),
+            new Player(
+                new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(), new FieldSpellZone(undefined),
+                    new Graveyard([new CardInstance(demoMonster)]),
+                    new ExtraDeck(new Array<CardInstance>()), new Banished([new FaceUpDownCardInstance(demoSpell, true)])),
                 8000,
                 new Hand([demoMonster]),
-                new Deck([])),
-            new Player(new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
-                new FieldSpellZone(new FaceUpDownCardInstance(demoFieldSpell, true)), new Graveyard(new Array<CardInstance>()),
-                new ExtraDeck([new CardInstance(extraMonster)]), new Banished(new Array<FaceUpDownCardInstance>())),
+                new Deck([])
+            ),
+            new Player(
+                new FieldHalf(createEmptyMonsterZones(), createEmptySpellTrapZones(),
+                    new FieldSpellZone(new FaceUpDownCardInstance(demoFieldSpell, true)), new Graveyard(new Array<CardInstance>()),
+                    new ExtraDeck([new CardInstance(extraMonster)]), new Banished(new Array<FaceUpDownCardInstance>())),
                 8000,
                 new Hand([demoMonster]),
-                new Deck([demoSpell]))
+                new Deck([demoSpell])
+            )
         ],
         0,
         Phase.Main1,
@@ -366,8 +359,7 @@ function setUpBoard(): HTMLElement {
     body.style.alignItems = 'stretch';
     let leftPane = document.createElement('div')
     leftPane.style.background = 'silver';
-    leftPane.style.cssFloat = 'left';
-    leftPane.style.minWidth = '1300px'
+    leftPane.style.minWidth = '900px'
 
     leftPane.appendChild(createHand(state.players[0].hand, rightPane))
     let board = document.createElement("table")
@@ -383,7 +375,8 @@ function setUpBoard(): HTMLElement {
                         extraMonsterZone.monster,
                         (extraMonsterZone.owner === 0) ? UpDownOrientation.Down : UpDownOrientation.Up,
                         false,
-                        true, rightPane
+                        true,
+                        rightPane
                     )
                     tr.appendChild(extraMonsterZoneElement)
                     extraMonsterZoneElement.style.width = cardHeight.toString() + "px"
