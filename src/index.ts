@@ -131,12 +131,11 @@ let createCard = function(
         name.innerText = card.name
         let stars = document.createElement('p')
         if (card.monster !== undefined) {
-            for (let i = 0; i < card.monster.level; i++) {
+            let level = card.monster.level
+            for (let i = 0; i < level; i++) {
                 stars.textContent += '★';
             }
-            stars.textContent += ' (';
-            stars.textContent += card.monster.level.toString();
-            stars.textContent += ')';
+            stars.textContent += ` (${level.toString()})`;
         }
         let type = document.createElement("b")
         type.innerText = card.type
