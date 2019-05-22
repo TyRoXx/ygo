@@ -1,3 +1,5 @@
+import { Monster } from "./Monster";
+
 function isPasscode(value: string): boolean {
     return (value.length == 8)
 }
@@ -18,12 +20,10 @@ export class Card {
     constructor(
         public id: Passcode,
         public name: string,
-        public originalAttack: Number,
-        public originalDefense: Number,
         public type: string,
-        public description: string
-    ) {
-    }
+        public description: string,
+        public monster?: Monster
+    ) { }
 }
 
 export class CardInstance {

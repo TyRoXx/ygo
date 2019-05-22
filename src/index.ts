@@ -3,6 +3,7 @@ import { FieldHalf, Banished, Graveyard, ExtraDeck } from './Field/Field'
 import { ExtraMonsterZone, MonsterZone, SpellTrapZone, FieldSpellZone } from './Field/Zones'
 import { Player, Hand, Deck } from './Player/Player';
 import { createParagraph } from './dom'
+import { Monster } from './Card/Monster';
 
 enum Phase {
     Draw,
@@ -94,15 +95,15 @@ let createCard = function(
     }
     cell.style.position = 'relative'
 
-    if (isMonsterZone) {
+    if (isMonsterZone && card.monster !== undefined) {
         let attack = document.createElement('p')
-        attack.innerText = String(card.originalAttack)
+        attack.innerText = String(card.monster.originalAttack)
         attack.style.color = 'red'
         attack.style.padding = "0"
         attack.style.margin = "0"
 
         let defense = document.createElement('p')
-        defense.innerText = String(card.originalDefense)
+        defense.innerText = String(card.monster.originalDefense)
         defense.style.color = 'blue'
         defense.style.padding = "0"
         defense.style.margin = "0"
@@ -128,6 +129,14 @@ let createCard = function(
         let rightPaneElement = rightPane.children[0]
         let name = document.createElement("h2")
         name.innerText = card.name
+        let stars = document.createElement('p')
+        stars.innerHTML = '';
+        if (card.monster !== undefined) {
+            console.log(card.monster.level)
+            for (let i = 0; i < card.monster.level; i++) {
+                stars.innerHTML += '&#9733;';
+            }
+        }
         let type = document.createElement("b")
         type.innerText = card.type
         while (rightPaneElement.firstChild) {
@@ -135,6 +144,7 @@ let createCard = function(
         }
         rightPaneElement.append(
             name,
+            stars,
             type,
             document.createElement("br"),
             document.createTextNode(card.description)
@@ -283,16 +293,14 @@ function setUpBoard(): HTMLElement {
     let demoMonster = new Card(
         new Passcode('85936485'),
         'United Resistance',
-        1000,
-        400,
         'Thunder',
-        'The people that gather to swear to fight their oppressors. A revolution is coming'
+        'The people that gather to swear to fight their oppressors. A revolution is coming',
+        new Monster(1000, 400, 3)
     );
 
     let demoSpell = new Card(
         new Passcode('02314238'),
         'Dark Magic Attack',
-        0, 0,
         'Normal',
         'If you control "Dark Magician": Destroy all Spell and Trap Cards your opponent controls.'
     )
@@ -300,18 +308,16 @@ function setUpBoard(): HTMLElement {
     let demoFieldSpell = new Card(
         new Passcode('79698395'),
         'Realm of Danger!',
-        0, 0,
         'Normal',
         'Your opponent cannot target “Danger!” monsters you control with card effects during the turn they are Special Summoned. Once per turn: you can target 1 “Danger!” monster you control; while you control that faceup monster and this faceup card, that monster can attack your opponent directly, also your opponent’s monsters cannot target it for attacks, but it does not prevent your opponent from attacking you directly.'
     )
 
     let extraMonster = new Card(
         new Passcode('23995346'),
-        'Ultimate Blue Eyed Dragon',
-        4500,
-        3800,
+        'Blue Eyed Ultimate Dragon',
         'Dragon/Fusion',
-        '"Blue-Eyes White Dragon" * 3'
+        '"Blue-Eyes White Dragon" * 3',
+        new Monster(4500, 3800, 12)
     )
 
     let state = new GameState(
