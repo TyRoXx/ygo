@@ -134,6 +134,9 @@ let createCard = function(
             for (let i = 0; i < card.monster.level; i++) {
                 stars.textContent += '★';
             }
+            stars.textContent += ' (';
+            stars.textContent += card.monster.level.toString();
+            stars.textContent += ')';
         }
         let type = document.createElement("b")
         type.innerText = card.type
