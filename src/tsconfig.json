@@ -12,7 +12,14 @@
         "strictNullChecks": true,
         "strictFunctionTypes": true,
         "lib": ["es2015", "dom"],
-        "module": "commonjs"
+        "module": "commonjs",
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strictPropertyInitialization": true,
+        "strictBindCallApply": true,
+        "strict": true
     },
     "includes": [
         "**"

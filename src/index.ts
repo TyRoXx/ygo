@@ -138,7 +138,7 @@ let createCard = function(
         cell.appendChild(overlay)
     }
 
-    cell.addEventListener('click', (e): void => {
+    cell.addEventListener('click', (_): void => {
         rightPane.style.display = 'block';
         let rightPaneElement = rightPane.children[0]
         let name = document.createElement("h2")
