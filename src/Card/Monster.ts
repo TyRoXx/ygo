@@ -1,7 +1,7 @@
 export class Monster {
     constructor(
-        public originalAttack: Number,
-        public originalDefense: Number,
-        public level: Number
+        public originalAttack: number,
+        public originalDefense: number,
+        public level: number
     ) { }
 }

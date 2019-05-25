@@ -2,8 +2,8 @@ import { CardInstance, FaceUpDownCardInstance, Card, Passcode } from './Card/Car
 import { FieldHalf, Banished, Graveyard, ExtraDeck } from './Field/Field'
 import { ExtraMonsterZone, MonsterZone, SpellTrapZone, FieldSpellZone } from './Field/Zones'
 import { Player, Hand, Deck } from './Player/Player';
-import { createParagraph } from './dom'
 import { Monster } from './Card/Monster';
+import { RightPane, setRightPaneFromCard } from './UI/RightPane';
 
 enum Phase {
     Draw,
@@ -80,7 +80,7 @@ let createCard = function(
     playerOrientation: UpDownOrientation,
     defenseMode: boolean,
     isMonsterZone: boolean,
-    rightPane: HTMLElement
+    rightPane: RightPane
 ): HTMLElement {
     if (cardInstance === undefined) {
         return createCell(undefined, playerOrientation, defenseMode)
@@ -124,32 +124,7 @@ let createCard = function(
         cell.appendChild(overlay)
     }
 
-    cell.addEventListener('click', (_): void => {
-        rightPane.style.display = 'block';
-        let rightPaneElement = rightPane.children[0]
-        let name = document.createElement("h2")
-        name.innerText = card.name
-        let stars = document.createElement('p')
-        if (card.monster !== undefined) {
-            let level = card.monster.level
-            for (let i = 0; i < level; i++) {
-                stars.textContent += '★';
-            }
-            stars.textContent += ` (${level.toString()})`;
-        }
-        let type = document.createElement("b")
-        type.innerText = card.type
-        while (rightPaneElement.firstChild) {
-            rightPaneElement.removeChild(rightPaneElement.firstChild);
-        }
-        rightPaneElement.append(
-            name,
-            stars,
-            type,
-            document.createElement("br"),
-            document.createTextNode(card.description)
-        )
-    });
+    cell.addEventListener('click', () => setRightPaneFromCard(rightPane, card));
 
     return cell;
 }
@@ -163,7 +138,7 @@ let setUpPlayer = function(
     board: HTMLTableElement,
     orientation: UpDownOrientation,
     playerState: Player,
-    rightPane: HTMLElement
+    rightPane: RightPane
 ): void {
     let field = playerState.field
     let appendChildren = function(to: HTMLElement, children: Array<HTMLElement>) {
@@ -265,7 +240,7 @@ let createEmptySpellTrapZones = function() {
     return zones
 }
 
-let createHand = function(hand: Hand, rightPane: HTMLElement): HTMLElement {
+let createHand = function(hand: Hand, rightPane: RightPane): HTMLElement {
     let container = document.createElement('div')
     container.style.textAlign = 'center'
 
@@ -278,7 +253,8 @@ let createHand = function(hand: Hand, rightPane: HTMLElement): HTMLElement {
                 new FaceUpDownCardInstance(card, true),
                 UpDownOrientation.Up,
                 false,
-                false, rightPane
+                false,
+                rightPane
             )
         );
     })
@@ -288,7 +264,6 @@ let createHand = function(hand: Hand, rightPane: HTMLElement): HTMLElement {
 }
 
 function setUpBoard(): HTMLElement {
-    let rightPane: HTMLElement = document.createElement('div');
 
     let demoMonster = new Card(
         new Passcode('85936485'),
@@ -335,7 +310,7 @@ function setUpBoard(): HTMLElement {
                     new FieldSpellZone(new FaceUpDownCardInstance(demoFieldSpell, true)), new Graveyard(new Array<CardInstance>()),
                     new ExtraDeck([new CardInstance(extraMonster)]), new Banished(new Array<FaceUpDownCardInstance>())),
                 8000,
-                new Hand([demoMonster]),
+                new Hand([demoMonster, demoSpell]),
                 new Deck([demoSpell])
             )
         ],
@@ -367,6 +342,7 @@ function setUpBoard(): HTMLElement {
     leftPane.style.background = 'silver';
     leftPane.style.minWidth = '900px'
 
+    let rightPane = new RightPane(document.createElement('div'))
     leftPane.appendChild(createHand(state.players[0].hand, rightPane))
     let board = document.createElement("table")
     setUpPlayer(board, UpDownOrientation.Down, state.players[0], rightPane)
@@ -399,14 +375,8 @@ function setUpBoard(): HTMLElement {
 
     leftPane.appendChild(createHand(state.players[1].hand, rightPane))
 
-    rightPane.appendChild(createParagraph('Card info'))
-    rightPane.style.backgroundColor = 'gold'
-    rightPane.style.width = '100%'
-    rightPane.style.padding = '5px 10px'
-    rightPane.style.minWidth = '10em'
-
     body.appendChild(leftPane)
-    body.appendChild(rightPane)
+    body.appendChild(rightPane.rightPane)
     return body
 }
 
