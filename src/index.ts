@@ -242,6 +242,19 @@ let createEmptySpellTrapZones = function() {
     return zones
 }
 
+let createExtraMonsterZone = function(state: GameState, index: number, rightPane: RightPane) {
+    let extraMonsterZone = state.extraMonsterZones[index]
+    let extraMonsterZoneElement = createCard(
+        extraMonsterZone.monster,
+        (extraMonsterZone.owner === 0) ? UpDownOrientation.Down : UpDownOrientation.Up,
+        false,
+        true,
+        rightPane
+    )
+    extraMonsterZoneElement.style.width = cardHeight.toString() + "px"
+    return extraMonsterZoneElement
+}
+
 let createHand = function(hand: Hand, rightPane: RightPane): HTMLElement {
     let container = document.createElement('div')
     container.style.textAlign = 'center'
@@ -347,29 +360,28 @@ function setUpBoard(): HTMLElement {
     let rightPane = new RightPane(document.createElement('div'))
     leftPane.appendChild(createHand(state.players[0].hand, rightPane))
     let board = document.createElement("table")
+    board.style.margin = 'auto'
     setUpPlayer(board, UpDownOrientation.Down, state.players[0], rightPane)
     {
         let tr = document.createElement("tr")
-        for (let i = 0; i < 9; ++i) {
-            switch (i) {
-                case 3:
-                case 5:
-                    let extraMonsterZone = state.extraMonsterZones[(i === 3) ? 0 : 1]
-                    let extraMonsterZoneElement = createCard(
-                        extraMonsterZone.monster,
-                        (extraMonsterZone.owner === 0) ? UpDownOrientation.Down : UpDownOrientation.Up,
-                        false,
-                        true,
-                        rightPane
-                    )
-                    tr.appendChild(extraMonsterZoneElement)
-                    extraMonsterZoneElement.style.width = cardHeight.toString() + "px"
-                    break
 
-                default:
-                    tr.appendChild(document.createElement("td"))
-            }
-        }
+        // Left life point display
+        let leftTd = document.createElement('td')
+        leftTd.colSpan = 3;
+        leftTd.textContent = `Opponent: ${state.players[0].life.toString()}`;
+        tr.appendChild(leftTd)
+
+        // Adding the extra monster zones
+        tr.appendChild(createExtraMonsterZone(state, 0, rightPane))
+        tr.appendChild(document.createElement("td"))
+        tr.appendChild(createExtraMonsterZone(state, 1, rightPane))
+
+        // Right life point display
+        let rightTd = document.createElement('td')
+        rightTd.colSpan = 3;
+        rightTd.textContent = `You: ${state.players[1].life.toString()}`;
+        tr.appendChild(rightTd);
+
         board.appendChild(tr)
     }
     setUpPlayer(board, UpDownOrientation.Up, state.players[1], rightPane)
