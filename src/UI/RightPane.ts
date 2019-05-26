@@ -50,6 +50,13 @@ export class RightPane {
     public setType(type: string): void {
         this.type.innerText = type;
     }
+
+    public clear(): void {
+        this.setHeading('');
+        this.setText('');
+        this.setLevel(undefined);
+        this.setType('');
+    }
 }
 
 export function setRightPaneFromCard(rightPane: RightPane, card: Card): void {

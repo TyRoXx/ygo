@@ -83,7 +83,9 @@ let createCard = function(
     rightPane: RightPane
 ): HTMLElement {
     if (cardInstance === undefined) {
-        return createCell(undefined, playerOrientation, defenseMode)
+        let cell = createCell(undefined, playerOrientation, defenseMode)
+        cell.addEventListener('click', () => rightPane.clear())
+        return cell;
     }
 
     let card = cardInstance.card;
@@ -372,7 +374,6 @@ function setUpBoard(): HTMLElement {
     }
     setUpPlayer(board, UpDownOrientation.Up, state.players[1], rightPane)
     leftPane.appendChild(board)
-
     leftPane.appendChild(createHand(state.players[1].hand, rightPane))
 
     body.appendChild(leftPane)
