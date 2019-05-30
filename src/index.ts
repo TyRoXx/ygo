@@ -257,10 +257,10 @@ let createExtraMonsterZone = function(state: GameState, index: number, rightPane
 
 let createHand = function(hand: Hand, rightPane: RightPane): HTMLElement {
     let container = document.createElement('div')
-    container.style.textAlign = 'center'
+    container.style.display = 'flex'
+    container.style.marginTop = '20px';
 
     let cardList = document.createElement('div');
-    cardList.style.marginTop = '20px';
     cardList.style.display = 'inline-block'
     hand.contents.forEach(card => {
         cardList.appendChild(
@@ -276,6 +276,13 @@ let createHand = function(hand: Hand, rightPane: RightPane): HTMLElement {
     container.appendChild(cardList);
 
     return container;
+}
+
+let createLifePoint = function(handContainer: HTMLElement, player: Player): void {
+    let lifePoints = document.createElement('div')
+
+    lifePoints.innerText = `LP: ${player.life}`
+    handContainer.prepend(lifePoints)
 }
 
 function setUpBoard(): HTMLElement {
@@ -358,9 +365,15 @@ function setUpBoard(): HTMLElement {
     leftPane.style.minWidth = '900px'
 
     let rightPane = new RightPane(document.createElement('div'))
-    leftPane.appendChild(createHand(state.players[0].hand, rightPane))
+
+    // first player
+    let handContainer: HTMLElement = createHand(state.players[0].hand, rightPane)
+    leftPane.appendChild(handContainer)
+    createLifePoint(handContainer, state.players[0])
+
     let board = document.createElement("table")
     board.style.margin = 'auto'
+
     setUpPlayer(board, UpDownOrientation.Down, state.players[0], rightPane)
     {
         let tr = document.createElement("tr")
@@ -368,7 +381,6 @@ function setUpBoard(): HTMLElement {
         // Left life point display
         let leftTd = document.createElement('td')
         leftTd.colSpan = 3;
-        leftTd.textContent = `Opponent: ${state.players[0].life.toString()}`;
         tr.appendChild(leftTd)
 
         // Adding the extra monster zones
@@ -379,14 +391,16 @@ function setUpBoard(): HTMLElement {
         // Right life point display
         let rightTd = document.createElement('td')
         rightTd.colSpan = 3;
-        rightTd.textContent = `You: ${state.players[1].life.toString()}`;
         tr.appendChild(rightTd);
 
         board.appendChild(tr)
     }
     setUpPlayer(board, UpDownOrientation.Up, state.players[1], rightPane)
     leftPane.appendChild(board)
-    leftPane.appendChild(createHand(state.players[1].hand, rightPane))
+
+    let yourHandContainer = createHand(state.players[1].hand, rightPane)
+    createLifePoint(yourHandContainer, state.players[1])
+    leftPane.appendChild(yourHandContainer)
 
     body.appendChild(leftPane)
     body.appendChild(rightPane.rightPane)
