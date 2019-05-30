@@ -6,17 +6,17 @@ import { Monster } from './Card/Monster';
 import { RightPane, setRightPaneFromCard } from './UI/RightPane';
 
 enum Phase {
-    Draw,
-    Standby,
-    Main1,
+    Draw = 'Draw',
+    Standby = 'Standby Phase',
+    Main1 = 'First Main phase',
     // Battle Phase begin
-    StartStep,
-    BattleStep,
-    DamageStep,
-    EndStep,
+    StartStep = 'Starting phase',
+    BattleStep = 'Battle phase',
+    DamageStep = 'Damage phase',
+    EndStep = 'End Phase',
     // Battle Phase end
-    Main2,
-    End
+    Main2 = 'Second main phase',
+    End = 'End Phase'
 }
 
 class GameState {
@@ -286,6 +286,21 @@ let createLifePoint = function(handContainer: HTMLElement, player: Player): void
     handContainer.prepend(lifePoints)
 }
 
+function createPhaseDisplay(container: HTMLElement, state: GameState): void {
+    let currentState = document.createElement('p')
+    currentState.innerText = state.phase.toString()
+
+    let nextState = document.createElement('button')
+    nextState.innerText = 'Next Phase'
+    nextState.addEventListener('click', () => {
+        state.phase = Phase.BattleStep;
+        container.innerHTML = ''
+        createPhaseDisplay(container, state);
+    });
+
+    container.append(currentState, nextState)
+}
+
 function setUpBoard(): HTMLElement {
 
     let demoMonster = new Card(
@@ -379,17 +394,20 @@ function setUpBoard(): HTMLElement {
     {
         let tr = document.createElement("tr")
 
-        // Left life point display
         let leftTd = document.createElement('td')
         leftTd.colSpan = 3;
         tr.appendChild(leftTd)
 
         // Adding the extra monster zones
         tr.appendChild(createExtraMonsterZone(state, 0, rightPane))
-        tr.appendChild(document.createElement("td"))
+
+        let centerCell = document.createElement("td")
+        createPhaseDisplay(centerCell, state);
+        tr.appendChild(centerCell)
+
+
         tr.appendChild(createExtraMonsterZone(state, 1, rightPane))
 
-        // Right life point display
         let rightTd = document.createElement('td')
         rightTd.colSpan = 3;
         tr.appendChild(rightTd);
