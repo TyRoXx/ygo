@@ -261,7 +261,7 @@ let createHand = function(hand: Hand, rightPane: RightPane): HTMLElement {
     container.style.marginTop = '20px';
 
     let cardList = document.createElement('div');
-    cardList.style.display = 'inline-block'
+    cardList.style.margin = 'auto'
     hand.contents.forEach(card => {
         cardList.appendChild(
             createCard(
@@ -280,6 +280,7 @@ let createHand = function(hand: Hand, rightPane: RightPane): HTMLElement {
 
 let createLifePoint = function(handContainer: HTMLElement, player: Player): void {
     let lifePoints = document.createElement('div')
+    lifePoints.style.minWidth = '5em'
 
     lifePoints.innerText = `LP: ${player.life}`
     handContainer.prepend(lifePoints)
