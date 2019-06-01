@@ -20,7 +20,8 @@
     "start": "node node_modules/http-server/bin/http-server -o",
     "test": "./node_modules/.bin/jest",
     "build": "./node_modules/.bin/tsc -p src && ./node_modules/.bin/browserify build/frontend/index.js -o build/front-end.js -d",
-    "format": "cd src && ../node_modules/.bin/tsfmt -r"
+    "format": "cd src && ../node_modules/.bin/tsfmt -r",
+    "testwatch": "./node_modules/.bin/jest --watch"
   },
   "repository": {
     "type": "git",
