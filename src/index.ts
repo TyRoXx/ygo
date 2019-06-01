@@ -75,6 +75,56 @@ let createCell = function(
     return cell
 }
 
+let addAttackAndDefenseOverlay = function(
+    monster: Monster,
+    playerOrientation: UpDownOrientation,
+    container: HTMLElement
+) {
+
+    let attack = document.createElement('p')
+    attack.innerText = String(monster.originalAttack)
+    attack.style.color = 'red'
+    attack.style.padding = "0"
+    attack.style.margin = "0"
+
+    let defense = document.createElement('p')
+    defense.innerText = String(monster.originalDefense)
+    defense.style.color = 'blue'
+    defense.style.padding = "0"
+    defense.style.margin = "0"
+
+    let overlay = document.createElement('div')
+    overlay.appendChild(attack);
+    overlay.appendChild(defense);
+    overlay.style.position = 'absolute';
+    if (playerOrientation === UpDownOrientation.Up) {
+        overlay.style.bottom = '0px'
+    } else {
+        overlay.style.top = '0px'
+    }
+    overlay.style.width = '100%';
+    overlay.style.zIndex = '10';
+    overlay.style.textAlign = 'center';
+    overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+    container.appendChild(overlay)
+}
+
+let addActions = function(cardInstance: FaceUpDownCardInstance, container: HTMLElement) {
+    let actionList = []
+    if (!cardInstance.isFaceUp) {
+        actionList.push('Turn up')
+    }
+
+    let actions = document.createElement('div')
+    actionList.forEach(actionText => {
+        let action = document.createElement('button')
+        action.innerText = actionText
+
+        actions.appendChild(action)
+    })
+    container.appendChild(actions)
+}
+
 let createCard = function(
     cardInstance: FaceUpDownCardInstance | undefined,
     playerOrientation: UpDownOrientation,
@@ -95,35 +145,14 @@ let createCard = function(
     } else {
         cell = createCell("https://vignette.wikia.nocookie.net/yugioh/images/e/e5/Back-EN.png/revision/latest?cb=20100726082133", playerOrientation, defenseMode)
     }
+    // Making cells relative so that the overlay can be absolute
     cell.style.position = 'relative'
 
     if (isMonsterZone && card.monster !== undefined) {
-        let attack = document.createElement('p')
-        attack.innerText = String(card.monster.originalAttack)
-        attack.style.color = 'red'
-        attack.style.padding = "0"
-        attack.style.margin = "0"
-
-        let defense = document.createElement('p')
-        defense.innerText = String(card.monster.originalDefense)
-        defense.style.color = 'blue'
-        defense.style.padding = "0"
-        defense.style.margin = "0"
-
-        let overlay = document.createElement('div')
-        overlay.appendChild(attack);
-        overlay.appendChild(defense);
-        overlay.style.position = 'absolute';
-        if (playerOrientation === UpDownOrientation.Up) {
-            overlay.style.bottom = '0px'
-        } else {
-            overlay.style.top = '0px'
-        }
-        overlay.style.width = '100%';
-        overlay.style.zIndex = '10';
-        overlay.style.textAlign = 'center';
-        overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
-        cell.appendChild(overlay)
+        addAttackAndDefenseOverlay(card.monster, playerOrientation, cell)
+    }
+    if (playerOrientation === UpDownOrientation.Up) {
+        addActions(cardInstance, cell)
     }
 
     cell.addEventListener('click', () => setRightPaneFromCard(rightPane, card));
@@ -255,6 +284,25 @@ let createExtraMonsterZone = function(state: GameState, index: number, rightPane
     return extraMonsterZoneElement
 }
 
+let addHandAction = function(card: Card, container: HTMLElement) {
+    let actionList = [
+        'Summon',
+        'Activate'
+    ]
+
+    // use card to shut the compiler up
+    card.id
+
+    let actions = document.createElement('div')
+    actionList.forEach(actionText => {
+        let action = document.createElement('button')
+        action.innerText = actionText
+
+        actions.appendChild(action)
+    })
+    container.appendChild(actions)
+}
+
 let createHand = function(hand: Hand, rightPane: RightPane): HTMLElement {
     let container = document.createElement('div')
     container.style.display = 'flex'
@@ -263,7 +311,7 @@ let createHand = function(hand: Hand, rightPane: RightPane): HTMLElement {
     let cardList = document.createElement('div');
     cardList.style.margin = 'auto'
     hand.contents.forEach(card => {
-        cardList.appendChild(
+        let cardContainer =
             createCard(
                 new FaceUpDownCardInstance(card, true),
                 UpDownOrientation.Up,
@@ -271,7 +319,9 @@ let createHand = function(hand: Hand, rightPane: RightPane): HTMLElement {
                 false,
                 rightPane
             )
-        );
+        cardList.appendChild(cardContainer);
+
+        addHandAction(card, cardContainer)
     })
     container.appendChild(cardList);
 
