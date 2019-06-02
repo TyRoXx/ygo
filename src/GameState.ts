@@ -1,7 +1,7 @@
 import { Player } from "./Player/Player";
 import { ExtraMonsterZone } from "./Field/Zones";
 
-export enum Phase {
+export const enum Phase {
     Draw = 'Draw',
     Standby = 'Standby Phase',
     Main1 = 'First Main phase',
@@ -18,8 +18,12 @@ export enum Phase {
 export class GameState {
     constructor(
         public players: Array<Player>,
-        public turnPlayer: Number,
+        public turnPlayer: number,
         public phase: Phase,
+
+        // TODO this field should only exist during the Draw Phase
+        public normalDrawUsed: boolean,
+
         public extraMonsterZones: Array<ExtraMonsterZone>) {
         if (players.length !== 2) {
             throw new Error("Unsupported number of players")
@@ -30,5 +34,9 @@ export class GameState {
         if (extraMonsterZones.length !== 2) {
             throw new Error("Unsupported number of extra monster zones")
         }
+    }
+
+    getTurnPlayer(): Player {
+        return this.players[this.turnPlayer]
     }
 }

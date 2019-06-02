@@ -5,6 +5,8 @@ import { Player, Hand, Deck } from './Player/Player';
 import { Monster } from './Card/Monster';
 import { RightPane, setRightPaneFromCard } from './UI/RightPane';
 import { GameState, Phase } from './GameState';
+import { Action, NormalDrawAction } from './Action';
+import { findLegalActions } from './Rules';
 
 const enum UpDownOrientation {
     Up,
@@ -88,6 +90,7 @@ let addActions = function(cardInstance: FaceUpDownCardInstance, container: HTMLE
     actionList.forEach(actionText => {
         let action = document.createElement('button')
         action.innerText = actionText
+        action.disabled = true
 
         actions.appendChild(action)
     })
@@ -134,11 +137,19 @@ let findCardPicture = function(passcode: Passcode): string {
     return `https://ygoprodeck.com/pics/${withoutLeadingZero}.jpg`
 }
 
+function findNormalDrawAction(actions: Array<Action>): NormalDrawAction | undefined {
+    return actions.find(element => {
+        return element instanceof NormalDrawAction
+    })
+}
+
 let setUpPlayer = function(
     board: HTMLTableElement,
     orientation: UpDownOrientation,
     playerState: Player,
-    rightPane: RightPane
+    rightPane: RightPane,
+    legalActions: Array<Action>,
+    chooseAction: (chosen: Action) => void
 ): void {
     let field = playerState.field
     let appendChildren = function(to: HTMLElement, children: Array<HTMLElement>) {
@@ -201,6 +212,18 @@ let setUpPlayer = function(
     let deck = createCell((playerState.deck.contents.length > 0)
         ? back
         : undefined, orientation, false)
+    {
+        let action: Action | undefined = findNormalDrawAction(legalActions)
+        if (action !== undefined) {
+            let drawButton = document.createElement("button")
+            drawButton.textContent = "Draw"
+            let boundAction = action
+            drawButton.onclick = () => {
+                chooseAction(boundAction)
+            }
+            deck.appendChild(drawButton)
+        }
+    }
     lowerRow.push(deck)
 
     let banished = createCell((field.banished.contents.length > 0)
@@ -266,6 +289,7 @@ let addHandAction = function(card: Card, container: HTMLElement) {
     actionList.forEach(actionText => {
         let action = document.createElement('button')
         action.innerText = actionText
+        action.disabled = true
 
         actions.appendChild(action)
     })
@@ -297,17 +321,17 @@ let createHand = function(hand: Hand, rightPane: RightPane): HTMLElement {
     return container;
 }
 
-let createLifePoint = function(handContainer: HTMLElement, player: Player): void {
+let createLifePoint = function(handContainer: HTMLElement, player: Player, playerIndex: number): void {
     let lifePoints = document.createElement('div')
     lifePoints.style.minWidth = '5em'
 
-    lifePoints.innerText = `LP: ${player.life}`
+    lifePoints.innerText = `Player ${playerIndex} LP: ${player.life}`
     handContainer.prepend(lifePoints)
 }
 
 function createPhaseDisplay(container: HTMLElement, state: GameState): void {
     let currentState = document.createElement('p')
-    currentState.innerText = state.phase.toString()
+    currentState.innerText = "Player " + state.turnPlayer + " / " + state.phase.toString()
 
     let nextState = document.createElement('button')
     nextState.innerText = 'Next Phase'
@@ -320,8 +344,7 @@ function createPhaseDisplay(container: HTMLElement, state: GameState): void {
     container.append(currentState, nextState)
 }
 
-function setUpBoard(): HTMLElement {
-
+function createDemoGameState(): GameState {
     let demoMonster = new Card(
         new Passcode('85936485'),
         'United Resistance',
@@ -371,8 +394,9 @@ function setUpBoard(): HTMLElement {
                 new Deck([demoSpell])
             )
         ],
-        0,
-        Phase.Main1,
+        1,
+        Phase.Draw,
+        false,
         [new ExtraMonsterZone(-1, undefined), new ExtraMonsterZone(-1, undefined)]
     )
 
@@ -391,7 +415,16 @@ function setUpBoard(): HTMLElement {
         extraMonster,
         true
     ))
+    return state
+}
 
+function removeAllChildren(parent: HTMLElement): void {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild)
+    }
+}
+
+function setUpBoard(state: GameState): HTMLElement {
     let body = document.createElement('div')
     body.style.display = 'flex';
     body.style.alignItems = 'stretch';
@@ -404,12 +437,20 @@ function setUpBoard(): HTMLElement {
     // first player
     let handContainer: HTMLElement = createHand(state.players[0].hand, rightPane)
     leftPane.appendChild(handContainer)
-    createLifePoint(handContainer, state.players[0])
+    createLifePoint(handContainer, state.players[0], 0)
 
     let board = document.createElement("table")
     board.style.margin = 'auto'
 
-    setUpPlayer(board, UpDownOrientation.Down, state.players[0], rightPane)
+    let legalActions = findLegalActions(state)
+
+    let chooseAction = function(chosen: Action) {
+        let newBody = setUpBoard(chosen.Take(state))
+        removeAllChildren(document.body)
+        document.body.appendChild(newBody)
+    }
+
+    setUpPlayer(board, UpDownOrientation.Down, state.players[0], rightPane, legalActions, chooseAction)
     {
         let tr = document.createElement("tr")
 
@@ -424,7 +465,6 @@ function setUpBoard(): HTMLElement {
         createPhaseDisplay(centerCell, state);
         tr.appendChild(centerCell)
 
-
         tr.appendChild(createExtraMonsterZone(state, 1, rightPane))
 
         let rightTd = document.createElement('td')
@@ -433,11 +473,11 @@ function setUpBoard(): HTMLElement {
 
         board.appendChild(tr)
     }
-    setUpPlayer(board, UpDownOrientation.Up, state.players[1], rightPane)
+    setUpPlayer(board, UpDownOrientation.Up, state.players[1], rightPane, legalActions, chooseAction)
     leftPane.appendChild(board)
 
     let yourHandContainer = createHand(state.players[1].hand, rightPane)
-    createLifePoint(yourHandContainer, state.players[1])
+    createLifePoint(yourHandContainer, state.players[1], 1)
     leftPane.appendChild(yourHandContainer)
 
     body.appendChild(leftPane)
@@ -445,4 +485,4 @@ function setUpBoard(): HTMLElement {
     return body
 }
 
-document.body.appendChild(setUpBoard())
+document.body.appendChild(setUpBoard(createDemoGameState()))
