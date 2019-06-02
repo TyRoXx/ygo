@@ -64,6 +64,12 @@ export class NormalDrawAction implements Action {
         } else {
             throw new Error("Normal draw is not possible with an empty deck")
         }
-        return originalState
+        return new GameState(
+            originalState.players,
+            originalState.turnPlayer,
+            Phase.Draw,
+            true,
+            originalState.extraMonsterZones
+        )
     }
 }
