@@ -280,7 +280,7 @@ let createExtraMonsterZone = function(state: GameState, index: number,
     return extraMonsterZoneElement
 }
 
-let addHandAction = function(card: Card, container: HTMLElement) {
+let createHandAction = function(card: Card) {
     let actionList = [
         'Summon',
         'Activate'
@@ -297,7 +297,7 @@ let addHandAction = function(card: Card, container: HTMLElement) {
 
         actions.appendChild(action)
     })
-    container.appendChild(actions)
+    return actions
 }
 
 let createHand = function(hand: Hand,
@@ -317,9 +317,8 @@ let createHand = function(hand: Hand,
                 false,
                 setRightPane
             )
-        cardList.appendChild(cardContainer);
-
-        addHandAction(card, cardContainer)
+        cardList.appendChild(cardContainer)
+        cardContainer.appendChild(createHandAction(card))
     })
     container.appendChild(cardList);
 
