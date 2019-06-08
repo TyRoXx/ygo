@@ -79,7 +79,7 @@ let createAttackAndDefenseOverlay = function(
     return overlay
 }
 
-let addActions = function(cardInstance: FaceUpDownCardInstance, container: HTMLElement) {
+let createActions = function(cardInstance: FaceUpDownCardInstance) {
     let actionList = []
     if (!cardInstance.isFaceUp) {
         actionList.push('Turn up')
@@ -93,7 +93,7 @@ let addActions = function(cardInstance: FaceUpDownCardInstance, container: HTMLE
 
         actions.appendChild(action)
     })
-    container.appendChild(actions)
+    return actions
 }
 
 let createCard = function(
@@ -125,7 +125,7 @@ let createCard = function(
         cell.appendChild(createAttackAndDefenseOverlay(card.monster, playerOrientation))
     }
     if (playerOrientation === UpDownOrientation.Up) {
-        addActions(cardInstance, cell)
+        cell.appendChild(createActions(cardInstance))
     }
 
     cell.addEventListener('click', () => {
