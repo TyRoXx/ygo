@@ -46,11 +46,10 @@ let createCell = function(
     return cell
 }
 
-let addAttackAndDefenseOverlay = function(
+let createAttackAndDefenseOverlay = function(
     monster: Monster,
-    playerOrientation: UpDownOrientation,
-    container: HTMLElement
-) {
+    playerOrientation: UpDownOrientation
+): HTMLElement {
 
     let attack = document.createElement('p')
     attack.innerText = String(monster.originalAttack)
@@ -77,7 +76,7 @@ let addAttackAndDefenseOverlay = function(
     overlay.style.zIndex = '10';
     overlay.style.textAlign = 'center';
     overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
-    container.appendChild(overlay)
+    return overlay
 }
 
 let addActions = function(cardInstance: FaceUpDownCardInstance, container: HTMLElement) {
@@ -123,7 +122,7 @@ let createCard = function(
     cell.style.position = 'relative'
 
     if (isMonsterZone && card.monster !== undefined) {
-        addAttackAndDefenseOverlay(card.monster, playerOrientation, cell)
+        cell.appendChild(createAttackAndDefenseOverlay(card.monster, playerOrientation))
     }
     if (playerOrientation === UpDownOrientation.Up) {
         addActions(cardInstance, cell)
