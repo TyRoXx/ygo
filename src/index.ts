@@ -3,7 +3,7 @@ import { FieldHalf, Banished, Graveyard, ExtraDeck } from './Field/Field'
 import { ExtraMonsterZone, MonsterZone, SpellTrapZone, FieldSpellZone } from './Field/Zones'
 import { Player, Hand, Deck } from './Player/Player';
 import { Monster } from './Card/Monster';
-import { RightPane, setRightPaneFromCard } from './UI/RightPane';
+import { createRightPaneFromCard } from './UI/RightPane';
 import { GameState, Phase } from './GameState';
 import { Action, NormalDrawAction } from './Action';
 import { findLegalActions } from './Rules';
@@ -102,11 +102,13 @@ let createCard = function(
     playerOrientation: UpDownOrientation,
     defenseMode: boolean,
     isMonsterZone: boolean,
-    rightPane: RightPane
+    setRightPane: (element: HTMLElement) => void
 ): HTMLElement {
     if (cardInstance === undefined) {
         let cell = createCell(undefined, playerOrientation, defenseMode)
-        cell.addEventListener('click', () => rightPane.clear())
+        cell.addEventListener('click', () => {
+            setRightPane(document.createElement("div"))
+        })
         return cell;
     }
 
@@ -127,7 +129,9 @@ let createCard = function(
         addActions(cardInstance, cell)
     }
 
-    cell.addEventListener('click', () => setRightPaneFromCard(rightPane, card));
+    cell.addEventListener('click', () => {
+        setRightPane(createRightPaneFromCard(card))
+    })
 
     return cell;
 }
@@ -147,7 +151,7 @@ let setUpPlayer = function(
     board: HTMLTableElement,
     orientation: UpDownOrientation,
     playerState: Player,
-    rightPane: RightPane,
+    setRightPane: (element: HTMLElement) => void,
     legalActions: Array<Action>,
     chooseAction: (chosen: Action) => void
 ): void {
@@ -173,7 +177,7 @@ let setUpPlayer = function(
     let back = "https://vignette.wikia.nocookie.net/yugioh/images/e/e5/Back-EN.png/revision/latest?cb=20100726082133"
 
     let fieldSpellCard = field.fieldSpell.fieldSpell
-    let fieldSpell = createCard(fieldSpellCard, orientation, false, false, rightPane)
+    let fieldSpell = createCard(fieldSpellCard, orientation, false, false, setRightPane)
     upperRow.push(fieldSpell)
 
     let extraDeck = createCell((playerState.field.extraDeck.contents.length > 0) ? back : undefined, orientation, false)
@@ -187,7 +191,7 @@ let setUpPlayer = function(
                 orientation,
                 monsterZone.inDefenseMode,
                 true,
-                rightPane
+                setRightPane
             )
             upperRow.push(monsterZoneElement)
             monsterZoneElement.style.width = cardHeight.toString() + "px"
@@ -198,7 +202,7 @@ let setUpPlayer = function(
         if (spellTrap === undefined) {
             spellTrapZoneElement = createCell(undefined, orientation, false)
         } else {
-            spellTrapZoneElement = createCard(spellTrap, orientation, false, false, rightPane)
+            spellTrapZoneElement = createCard(spellTrap, orientation, false, false, setRightPane)
         }
         lowerRow.push(spellTrapZoneElement)
         spellTrapZoneElement.style.width = cardHeight.toString() + "px"
@@ -263,14 +267,15 @@ let createEmptySpellTrapZones = function() {
     return zones
 }
 
-let createExtraMonsterZone = function(state: GameState, index: number, rightPane: RightPane) {
+let createExtraMonsterZone = function(state: GameState, index: number,
+    setRightPane: (element: HTMLElement) => void) {
     let extraMonsterZone = state.extraMonsterZones[index]
     let extraMonsterZoneElement = createCard(
         extraMonsterZone.monster,
         (extraMonsterZone.owner === 0) ? UpDownOrientation.Down : UpDownOrientation.Up,
         false,
         true,
-        rightPane
+        setRightPane
     )
     extraMonsterZoneElement.style.width = cardHeight.toString() + "px"
     return extraMonsterZoneElement
@@ -296,7 +301,8 @@ let addHandAction = function(card: Card, container: HTMLElement) {
     container.appendChild(actions)
 }
 
-let createHand = function(hand: Hand, rightPane: RightPane): HTMLElement {
+let createHand = function(hand: Hand,
+    setRightPane: (element: HTMLElement) => void): HTMLElement {
     let container = document.createElement('div')
     container.style.display = 'flex'
     container.style.marginTop = '20px';
@@ -310,7 +316,7 @@ let createHand = function(hand: Hand, rightPane: RightPane): HTMLElement {
                 UpDownOrientation.Up,
                 false,
                 false,
-                rightPane
+                setRightPane
             )
         cardList.appendChild(cardContainer);
 
@@ -432,10 +438,16 @@ function setUpBoard(state: GameState): HTMLElement {
     leftPane.style.background = 'silver';
     leftPane.style.minWidth = '900px'
 
-    let rightPane = new RightPane(document.createElement('div'))
+    let rightPaneContainer = document.createElement("div")
+    rightPaneContainer.style.width = '100%'
+    rightPaneContainer.style.backgroundColor = 'gold'
+    let setRightPane = (element: HTMLElement) => {
+        removeAllChildren(rightPaneContainer)
+        rightPaneContainer.appendChild(element)
+    }
 
     // first player
-    let handContainer: HTMLElement = createHand(state.players[0].hand, rightPane)
+    let handContainer: HTMLElement = createHand(state.players[0].hand, setRightPane)
     leftPane.appendChild(handContainer)
     createLifePoint(handContainer, state.players[0], 0)
 
@@ -450,7 +462,7 @@ function setUpBoard(state: GameState): HTMLElement {
         document.body.appendChild(newBody)
     }
 
-    setUpPlayer(board, UpDownOrientation.Down, state.players[0], rightPane, legalActions, chooseAction)
+    setUpPlayer(board, UpDownOrientation.Down, state.players[0], setRightPane, legalActions, chooseAction)
     {
         let tr = document.createElement("tr")
 
@@ -459,13 +471,13 @@ function setUpBoard(state: GameState): HTMLElement {
         tr.appendChild(leftTd)
 
         // Adding the extra monster zones
-        tr.appendChild(createExtraMonsterZone(state, 0, rightPane))
+        tr.appendChild(createExtraMonsterZone(state, 0, setRightPane))
 
         let centerCell = document.createElement("td")
         createPhaseDisplay(centerCell, state);
         tr.appendChild(centerCell)
 
-        tr.appendChild(createExtraMonsterZone(state, 1, rightPane))
+        tr.appendChild(createExtraMonsterZone(state, 1, setRightPane))
 
         let rightTd = document.createElement('td')
         rightTd.colSpan = 3;
@@ -473,15 +485,15 @@ function setUpBoard(state: GameState): HTMLElement {
 
         board.appendChild(tr)
     }
-    setUpPlayer(board, UpDownOrientation.Up, state.players[1], rightPane, legalActions, chooseAction)
+    setUpPlayer(board, UpDownOrientation.Up, state.players[1], setRightPane, legalActions, chooseAction)
     leftPane.appendChild(board)
 
-    let yourHandContainer = createHand(state.players[1].hand, rightPane)
+    let yourHandContainer = createHand(state.players[1].hand, setRightPane)
     createLifePoint(yourHandContainer, state.players[1], 1)
     leftPane.appendChild(yourHandContainer)
 
     body.appendChild(leftPane)
-    body.appendChild(rightPane.rightPane)
+    body.appendChild(rightPaneContainer)
     return body
 }
 

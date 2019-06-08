@@ -1,71 +1,41 @@
 import { Card } from "../Card/Card";
 
-export class RightPane {
-    private heading: HTMLElement;
-    private text: HTMLElement;
-    private level: HTMLElement;
-    private type: HTMLElement;
+function createRightPane(headingText: string, type: string,
+    level: number | undefined, description: string) {
+    let rightPane = document.createElement('div')
 
-    constructor(
-        public rightPane: HTMLElement
-    ) {
-        this.rightPane.style.backgroundColor = 'gold'
-        this.rightPane.style.width = '100%'
-        this.rightPane.style.padding = '5px 10px'
-        this.rightPane.style.minWidth = '10em'
+    rightPane.style.backgroundColor = 'gold'
+    rightPane.style.width = '100%'
+    rightPane.style.padding = '5px 10px'
+    rightPane.style.minWidth = '10em'
 
-        // Creating the heading
-        this.heading = document.createElement('h2')
-        this.type = document.createElement('b')
-        this.type.style.display = 'block';
+    let heading = document.createElement('h2')
+    heading.innerText = headingText;
 
-        this.level = document.createElement('p');
-        this.text = document.createElement('div')
+    let typeElement = document.createElement('b')
+    typeElement.style.display = 'block';
+    typeElement.innerText = type
 
-        rightPane.append(
-            this.heading,
-            this.level,
-            this.type,
-            this.text
-        )
+    let levelElement = document.createElement('p')
+    if (level === undefined) {
+        levelElement.innerText = '';
+    } else {
+        levelElement.innerText = '★'.repeat(level) + ` (${level.toString()})`;
     }
 
-    public setHeading(headingText: string): void {
-        this.heading.innerText = headingText;
-    }
+    let text = document.createElement('div')
+    text.innerText = description
 
-    public setText(description: string): void {
-        this.text.innerText = description;
-    }
-
-    public setLevel(level: number | undefined): void {
-        if (level === undefined) {
-            this.level.innerText = '';
-            return;
-        }
-
-        this.level.innerText = '★'.repeat(level) + ` (${level.toString()})`;
-    }
-
-    public setType(type: string): void {
-        this.type.innerText = type;
-    }
-
-    public clear(): void {
-        this.setHeading('');
-        this.setText('');
-        this.setLevel(undefined);
-        this.setType('');
-    }
+    rightPane.append(
+        heading,
+        levelElement,
+        typeElement,
+        text
+    )
+    return rightPane
 }
 
-export function setRightPaneFromCard(rightPane: RightPane, card: Card): void {
-    rightPane.setHeading(card.name)
-    rightPane.setType(card.type)
-    if (card.monster) {
-        rightPane.setLevel(card.monster.level)
-    } else {
-        rightPane.setLevel(undefined)
-    }
-    rightPane.setText(card.description)
+export function createRightPaneFromCard(card: Card) {
+    return createRightPane(card.name, card.type,
+        card.monster ? card.monster.level : undefined, card.description)
 }
