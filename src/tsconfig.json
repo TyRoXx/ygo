@@ -11,7 +11,7 @@
         "alwaysStrict": true,
         "strictNullChecks": true,
         "strictFunctionTypes": true,
-        "lib": ["es2015", "dom"],
+        "lib": ["dom", "es6"],
         "module": "commonjs",
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
@@ -19,7 +19,8 @@
         "noUnusedParameters": true,
         "strictPropertyInitialization": true,
         "strictBindCallApply": true,
-        "strict": true
+        "strict": true,
+        "target": "es6"
     },
     "includes": [
         "**"

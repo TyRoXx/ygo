@@ -1,12 +1,13 @@
 import { CardInstance, FaceUpDownCardInstance, Card, Passcode } from './Card/Card'
 import { FieldHalf, Banished, Graveyard, ExtraDeck } from './Field/Field'
-import { ExtraMonsterZone, MonsterZone, SpellTrapZone, FieldSpellZone } from './Field/Zones'
+import { ExtraMonsterZone, FieldSpellZone } from './Field/Zones'
 import { Player, Hand, Deck } from './Player/Player';
 import { Monster } from './Card/Monster';
 import { createRightPaneFromCard } from './UI/RightPane';
 import { GameState, Phase } from './GameState';
 import { Action, NormalDrawAction } from './Action';
 import { findLegalActions } from './Rules';
+import { createEmptyMonsterZones, createEmptySpellTrapZones } from './PrepareDuel';
 
 const enum UpDownOrientation {
     Up,
@@ -248,22 +249,6 @@ let setUpPlayer = function(
         player.push(tr)
     }
     appendChildren(board, player)
-}
-
-let createEmptyMonsterZones = function() {
-    let zones = new Array<MonsterZone>()
-    for (let i = 0; i < 5; ++i) {
-        zones.push(new MonsterZone(undefined, i % 2 === 0))
-    }
-    return zones
-}
-
-let createEmptySpellTrapZones = function() {
-    let zones = new Array<SpellTrapZone>()
-    for (let i = 0; i < 5; ++i) {
-        zones.push(new SpellTrapZone(undefined))
-    }
-    return zones
 }
 
 let createExtraMonsterZone = function(state: GameState, index: number,

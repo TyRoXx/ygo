@@ -5,6 +5,10 @@ function isPasscode(value: string): boolean {
 }
 
 export class Passcode {
+    equals(code: Passcode): boolean {
+        return (this.value === code.value)
+    }
+
     constructor(private value: string) {
         if (!isPasscode(value)) {
             throw new Error("Passcode expected: " + value)
